@@ -1,6 +1,6 @@
 # hapble — a from-scratch HAP-BLE client for the Nanoleaf Remote
 
-[![CI](https://github.com/Jeromearsene/hapble/actions/workflows/ci.yml/badge.svg)](https://github.com/Jeromearsene/hapble/actions/workflows/ci.yml)
+[![CI](https://github.com/Jeromearsene/nanoleaf-remote-HA/actions/workflows/ci.yml/badge.svg)](https://github.com/Jeromearsene/nanoleaf-remote-HA/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 🇬🇧 English (this document) | 🇫🇷 [Français](README.fr.md)

@@ -1,0 +1,28 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Nanoleaf Remote",
+        "description": "Saisissez l'adresse Bluetooth et le code d'appairage HomeKit de la télécommande.",
+        "data": {
+          "address": "Adresse Bluetooth",
+          "setup_code": "Code d'appairage (XXX-XX-XXX)"
+        }
+      }
+    },
+    "error": {
+      "device_not_found": "Télécommande introuvable via Bluetooth. Vérifiez la portée et le Bluetooth de Home Assistant.",
+      "pairing_failed": "Échec de l'appairage. Vérifiez le code et réessayez."
+    },
+    "abort": {
+      "already_configured": "Cette télécommande est déjà configurée."
+    }
+  },
+  "entity": {
+    "event": {
+      "position": {
+        "name": "Position"
+      }
+    }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Nanoleaf Remote",
+        "description": "Enter the Bluetooth address and the remote's HomeKit pairing code.",
+        "data": {
+          "address": "Bluetooth address",
+          "setup_code": "Pairing code (XXX-XX-XXX)"
+        }
+      }
+    },
+    "error": {
+      "device_not_found": "Remote not found over Bluetooth. Check range and Home Assistant Bluetooth.",
+      "pairing_failed": "Pairing failed. Check the code and try again."
+    },
+    "abort": {
+      "already_configured": "This remote is already configured."
+    }
+  },
+  "entity": {
+    "event": {
+      "position": {
+        "name": "Position"
+      }
+    }
+  }
+}

@@ -22,8 +22,8 @@ dependencies = [
 ]
 
 [project.urls]
-Repository = "https://github.com/Jeromearsene/hapble"
-Issues = "https://github.com/Jeromearsene/hapble/issues"
+Repository = "https://github.com/Jeromearsene/nanoleaf-remote-HA"
+Issues = "https://github.com/Jeromearsene/nanoleaf-remote-HA/issues"
 
 [tool.poetry]
 # Layout "plat" : le package importable est ./hapble, et les scripts

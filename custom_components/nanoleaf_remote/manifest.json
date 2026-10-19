@@ -1,0 +1,11 @@
+{
+  "domain": "nanoleaf_remote",
+  "name": "Nanoleaf Remote",
+  "version": "0.1.0",
+  "documentation": "https://github.com/Jeromearsene/nanoleaf-remote-HA",
+  "issue_tracker": "https://github.com/Jeromearsene/nanoleaf-remote-HA/issues",
+  "codeowners": ["@Jeromearsene"],
+  "config_flow": true,
+  "dependencies": ["bluetooth"],
+  "requirements": ["cryptography>=41"]
+}

@@ -252,6 +252,7 @@ class HapBleAccessory:
         device_or_address,
         connect_retries: int = 3,
         retry_delay_seconds: float = 1.5,
+        client: Optional[BleakClient] = None,
     ):
         """`device_or_address` peut être soit une adresse (str), soit un
         objet BLEDevice déjà découvert par un scan. Passer directement le
@@ -269,10 +270,19 @@ class HapBleAccessory:
         self.device_or_address = device_or_address
         self.connect_retries = connect_retries
         self.retry_delay_seconds = retry_delay_seconds
-        self.client: Optional[BleakClient] = None
+        self.client: Optional[BleakClient] = client
+        self._owns_client = client is None
         self.request_lock = asyncio.Lock()
 
     async def __aenter__(self) -> "HapBleAccessory":
+        # Home Assistant integrations can inject a client connected through
+        # Home Assistant's Bluetooth manager/retry connector. In that case,
+        # this wrapper must not create a second BLE connection.
+        if self.client is not None:
+            if not self.client.is_connected:
+                raise ConnectionError("Le client BLE fourni n'est pas connecté.")
+            return self
+
         last_error: Optional[Exception] = None
         for attempt in range(1, self.connect_retries + 1):
             # Une nouvelle instance de BleakClient à chaque tentative :
@@ -307,7 +317,7 @@ class HapBleAccessory:
         ) from last_error
 
     async def __aexit__(self, exc_type, exc, tb) -> None:
-        if self.client is not None:
+        if self.client is not None and self._owns_client:
             await self.client.disconnect()
 
     def get_characteristic(
