@@ -1,0 +1,18 @@
+.venv/
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+.DS_Store
+Thumbs.db
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+
+# Secrets / local config — never commit these.
+.env
+
+# Contains our Ed25519 private key after Pair-Setup — never share or
+# commit it, same caution as a password.
+pairing.json

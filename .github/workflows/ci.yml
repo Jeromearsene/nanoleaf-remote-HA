@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  lint:
+    name: Lint & format check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Install dependencies
+        run: poetry install --no-interaction
+      - name: ruff check
+        run: poetry run ruff check .
+      - name: ruff format --check
+        run: poetry run ruff format --check .
+
+  test:
+    name: Hardware-independent tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Install dependencies
+        run: poetry install --no-interaction
+      - name: SRP implementation vs. official Apple test vector
+        run: poetry run srp-vector
+      - name: Full Pair-Setup against a simulated accessory
+        run: poetry run pairing-fake
+      - name: Full Pair-Verify against a simulated accessory
+        run: poetry run verify-fake
+      - name: Byte-compile every module (catches syntax errors)
+        run: |
+          python -m py_compile hapble/*.py *.py
+
+  # Ces trois commandes-ci ont besoin d'un vrai Bluetooth et d'une vraie
+  # Nanoleaf Remote — elles ne peuvent pas tourner en CI. Voir README.md
+  # (section "Project status") pour ce qui a été validé contre du vrai
+  # matériel et comment le reproduire soi-même : phase1, phase2, phase3,
+  # phase4, phase5, calibrate, bridge.

@@ -1,0 +1,94 @@
+[project]
+name = "hapble"
+version = "0.1.0"
+description = "A from-scratch HAP-BLE (HomeKit Accessory Protocol over Bluetooth LE) client built on bleak, to control a Nanoleaf Remote from Home Assistant without depending on Apple Home."
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10,<4.0"
+keywords = ["homekit", "hap-ble", "bluetooth-low-energy", "nanoleaf", "home-assistant", "mqtt"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Home Automation",
+    "Topic :: System :: Hardware",
+]
+dependencies = [
+    "bleak (>=0.21)",
+    "cryptography (>=41)",
+    "aiomqtt (>=2.0,<3.0)",
+    "python-dotenv (>=1.0)",
+]
+
+[project.urls]
+Repository = "https://github.com/Jeromearsene/hapble"
+Issues = "https://github.com/Jeromearsene/hapble/issues"
+
+[tool.poetry]
+# Layout "plat" : le package importable est ./hapble, et les scripts
+# test_phase*.py etc. sont des modules top-level du dépôt lui-même (pas
+# publiés séparément) — inclus via `include` pour que les points d'entrée
+# ci-dessous puissent les importer une fois le projet installé en mode
+# développement (`poetry install`).
+packages = [
+    { include = "hapble" },
+    { include = "test_phase1.py" },
+    { include = "test_phase2.py" },
+    { include = "test_phase3.py" },
+    { include = "test_phase4.py" },
+    { include = "test_phase5.py" },
+    { include = "test_pairing_e2e_fake.py" },
+    { include = "test_pair_verify_e2e_fake.py" },
+    { include = "test_srp_official_vector.py" },
+    { include = "bridge.py" },
+    { include = "calibrate.py" },
+]
+
+[tool.poetry.group.dev.dependencies]
+ruff = ">=0.6"
+pre-commit = ">=3.7"
+
+[tool.poetry.scripts]
+# Sans matériel :
+srp-vector    = "test_srp_official_vector:cli"
+pairing-fake  = "test_pairing_e2e_fake:cli"
+verify-fake   = "test_pair_verify_e2e_fake:cli"
+# Contre le vrai appareil, dans l'ordre :
+phase1        = "test_phase1:cli"
+phase2        = "test_phase2:cli"
+phase3        = "test_phase3:cli"
+phase4        = "test_phase4:cli"
+phase5        = "test_phase5:cli"
+bridge        = "bridge:cli"
+calibrate     = "calibrate:cli"
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+
+[tool.ruff.lint]
+# Base sensible pour un projet perso qui a grandi vite : erreurs Pyflakes,
+# style pycodestyle, imports (isort), et bugs courants (flake8-bugbear).
+# Volontairement pas plus strict pour l'instant (pas de docstring-style,
+# pas de complexité cyclomatique) - le code est deja tres commente/motive
+# en prose ; on resserera si le projet grandit.
+select = ["E", "F", "I", "B", "W"]
+ignore = [
+    "E501",  # ligne trop longue : les commentaires en français dépassent
+             # parfois 88 caractères ; le formatter gère déjà le code lui-même.
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Les scripts de test/demo font un usage volontaire de `from module import
+# main` en bas de fichier et de variables non utilisées pour la lisibilité
+# des logs de debug — pas la peine d'être strict dessus.
+"test_*.py" = ["F401", "F841"]
+# I, P, A, B, S, K, x, u, v suivent la notation du vecteur de test officiel
+# SRP (spec HAP §5.5.2) — les renommer casserait la correspondance directe
+# avec le texte de la spec que ce fichier vérifie.
+"test_srp_official_vector.py" = ["E741"]
+
+[build-system]
+requires = ["poetry-core>=2.0"]
+build-backend = "poetry.core.masonry.api"
