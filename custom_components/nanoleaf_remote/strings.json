@@ -1,27 +1,60 @@
 {
   "config": {
+    "flow_title": "{name}",
     "step": {
       "user": {
         "title": "Nanoleaf Remote",
-        "description": "Saisissez l'adresse Bluetooth et le code d'appairage HomeKit de la télécommande.",
+        "description": "Before continuing, remove the Remote from Apple Home: it only accepts one controller. Then choose the Remote and enter the 8-digit HomeKit setup code printed on it.",
         "data": {
-          "address": "Adresse Bluetooth",
-          "setup_code": "Code d'appairage (XXX-XX-XXX)"
+          "address": "Bluetooth address",
+          "setup_code": "Setup code (XXX-XX-XXX or 8 digits)"
+        }
+      },
+      "confirm": {
+        "title": "Pair {name}",
+        "description": "Remove the Remote from Apple Home first: it only accepts one controller. Then enter the 8-digit HomeKit setup code printed on it.",
+        "data": {
+          "setup_code": "Setup code (XXX-XX-XXX or 8 digits)"
         }
       }
     },
     "error": {
-      "device_not_found": "Télécommande introuvable via Bluetooth. Vérifiez la portée et le Bluetooth de Home Assistant.",
-      "pairing_failed": "Échec de l'appairage. Vérifiez le code et réessayez."
+      "device_not_found": "The Remote is not visible to Home Assistant Bluetooth. Wake it by turning it and check the range of your Bluetooth adapter or proxy.",
+      "cannot_connect": "Could not connect to the Remote. Try again while turning it gently to keep it awake.",
+      "timeout": "The pairing took too long. Try again.",
+      "invalid_setup_code": "The setup code must contain 8 digits.",
+      "invalid_auth": "The setup code was rejected. Check it against the label on the Remote.",
+      "already_paired": "The Remote refuses new pairings. Remove it from Apple Home (or from any other controller) and try again.",
+      "too_many_attempts": "Too many attempts. Wait a few minutes before trying again.",
+      "busy": "The Remote is busy. Try again in a moment.",
+      "pairing_failed": "Pairing failed. Check the Home Assistant logs for details."
     },
     "abort": {
-      "already_configured": "Cette télécommande est déjà configurée."
+      "already_configured": "This Remote is already configured."
     }
   },
   "entity": {
     "event": {
       "position": {
-        "name": "Position"
+        "name": "Position",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "face_1": "Face 1",
+              "face_2": "Face 2",
+              "face_3": "Face 3",
+              "face_4": "Face 4",
+              "face_5": "Face 5",
+              "face_6": "Face 6",
+              "face_7": "Face 7",
+              "face_8": "Face 8",
+              "face_9": "Face 9",
+              "face_10": "Face 10",
+              "face_11": "Face 11",
+              "face_12": "Face 12"
+            }
+          }
+        }
       }
     }
   }

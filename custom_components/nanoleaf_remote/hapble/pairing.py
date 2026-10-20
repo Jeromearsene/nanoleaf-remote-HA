@@ -33,7 +33,14 @@ from .transport import HapBleCharacteristic
 
 class PairSetupError(Exception):
     """Erreur remontée par l'accessoire (kTLVType_Error) ou détectée
-    localement (State inattendu, signature invalide, etc.)."""
+    localement (State inattendu, signature invalide, etc.).
+
+    `tlv_error` contient le code kTLVType_Error de l'accessoire (voir
+    `uuids.TLVError`) quand il est à l'origine du refus, sinon None."""
+
+    def __init__(self, message: str, tlv_error: int | None = None):
+        super().__init__(message)
+        self.tlv_error = tlv_error
 
 
 @dataclass
@@ -83,7 +90,9 @@ def _check_error(ktlvs: dict) -> None:
             uuids.TLVError.UNAVAILABLE: "L'appairage n'est pas/plus disponible sur cet accessoire.",
             uuids.TLVError.BUSY: "L'accessoire est occupé, réessayer plus tard.",
         }.get(code, f"Code d'erreur TLV inconnu: 0x{code:02x}")
-        raise PairSetupError(f"L'accessoire a refusé l'appairage : {message}")
+        raise PairSetupError(
+            f"L'accessoire a refusé l'appairage : {message}", tlv_error=code
+        )
 
 
 async def pair_setup(

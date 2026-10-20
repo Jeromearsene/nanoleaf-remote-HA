@@ -47,7 +47,9 @@ jobs:
         run: poetry run verify-fake
       - name: Byte-compile every module (catches syntax errors)
         run: |
-          python -m py_compile hapble/*.py *.py
+          python -m py_compile hapble/*.py *.py scripts/*.py custom_components/nanoleaf_remote/*.py
+      - name: Vendored hapble copy matches the library
+        run: python scripts/sync_vendored.py --check
 
   # Ces trois commandes-ci ont besoin d'un vrai Bluetooth et d'une vraie
   # Nanoleaf Remote — elles ne peuvent pas tourner en CI. Voir README.md
