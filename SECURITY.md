@@ -29,6 +29,17 @@ allows a paired controller to do). It is already excluded via `.gitignore`
 paste terminal output while reporting an issue, double-check it doesn't
 contain the contents of `pairing.json` or your 8-digit setup code.
 
+## Sensitive data stored by the Home Assistant integration
+
+The integration stores the same pairing material (controller private key,
+accessory public key and identifiers) inside its config entry. Home
+Assistant keeps config entries as **unencrypted JSON** in `.storage/` in
+your configuration directory, so treat that directory, and any Home
+Assistant backup that contains it, like a password. The 8-digit setup code
+is used once to pair and is never stored or logged. If you suspect the
+material leaked, remove the Remote from Home Assistant, factory-reset it
+and pair it again.
+
 ## Reporting a vulnerability
 
 If you find an issue in the cryptographic implementation itself (for

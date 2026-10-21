@@ -8,10 +8,10 @@ on:
 jobs:
   lint:
     name: Lint & format check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.12"
       - name: Install Poetry
@@ -25,14 +25,14 @@ jobs:
 
   test:
     name: Hardware-independent tests (Python ${{ matrix.python-version }})
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install Poetry
@@ -47,7 +47,9 @@ jobs:
         run: poetry run verify-fake
       - name: Byte-compile every module (catches syntax errors)
         run: |
-          python -m py_compile hapble/*.py *.py
+          python -m py_compile hapble/*.py *.py scripts/*.py custom_components/nanoleaf_remote/*.py
+      - name: Vendored hapble copy matches the library
+        run: python scripts/sync_vendored.py --check
 
   # Ces trois commandes-ci ont besoin d'un vrai Bluetooth et d'une vraie
   # Nanoleaf Remote — elles ne peuvent pas tourner en CI. Voir README.md

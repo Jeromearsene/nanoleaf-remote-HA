@@ -1,0 +1,61 @@
+{
+  "config": {
+    "flow_title": "{name}",
+    "step": {
+      "user": {
+        "title": "Nanoleaf Remote",
+        "description": "Avant de continuer, supprimez la télécommande d'Apple Maison : elle n'accepte qu'un seul contrôleur. Choisissez ensuite la télécommande et saisissez le code HomeKit à 8 chiffres imprimé dessus.",
+        "data": {
+          "address": "Adresse Bluetooth",
+          "setup_code": "Code d'appairage (XXX-XX-XXX ou 8 chiffres)"
+        }
+      },
+      "confirm": {
+        "title": "Appairer {name}",
+        "description": "Supprimez d'abord la télécommande d'Apple Maison : elle n'accepte qu'un seul contrôleur. Saisissez ensuite le code HomeKit à 8 chiffres imprimé dessus.",
+        "data": {
+          "setup_code": "Code d'appairage (XXX-XX-XXX ou 8 chiffres)"
+        }
+      }
+    },
+    "error": {
+      "device_not_found": "La télécommande n'est pas visible par le Bluetooth de Home Assistant. Réveillez-la en la tournant et vérifiez la portée de votre adaptateur ou proxy Bluetooth.",
+      "cannot_connect": "Connexion impossible à la télécommande. Réessayez en la tournant doucement pour la garder éveillée.",
+      "timeout": "L'appairage a pris trop de temps. Réessayez.",
+      "invalid_setup_code": "Le code d'appairage doit contenir 8 chiffres.",
+      "invalid_auth": "Le code d'appairage a été refusé. Comparez-le à l'étiquette de la télécommande.",
+      "already_paired": "La télécommande refuse un nouvel appairage. Supprimez-la d'Apple Maison (ou de tout autre contrôleur) puis réessayez.",
+      "too_many_attempts": "Trop de tentatives. Patientez quelques minutes avant de réessayer.",
+      "busy": "La télécommande est occupée. Réessayez dans un instant.",
+      "pairing_failed": "Échec de l'appairage. Consultez les journaux de Home Assistant."
+    },
+    "abort": {
+      "already_configured": "Cette télécommande est déjà configurée."
+    }
+  },
+  "entity": {
+    "event": {
+      "position": {
+        "name": "Position",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "face_1": "Face 1",
+              "face_2": "Face 2",
+              "face_3": "Face 3",
+              "face_4": "Face 4",
+              "face_5": "Face 5",
+              "face_6": "Face 6",
+              "face_7": "Face 7",
+              "face_8": "Face 8",
+              "face_9": "Face 9",
+              "face_10": "Face 10",
+              "face_11": "Face 11",
+              "face_12": "Face 12"
+            }
+          }
+        }
+      }
+    }
+  }
+}

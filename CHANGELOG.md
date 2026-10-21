@@ -11,6 +11,13 @@ iterative reverse-engineering effort; see `README.md` for the full story of
 each phase, including the dead ends and what confirmed each fix.
 
 ### Added
+- Home Assistant (HACS) integration in `custom_components/nanoleaf_remote/`:
+  Bluetooth discovery and UI pairing flow, an Event entity (`face_1` …
+  `face_12`), reconnection with backoff, per-remote events and availability.
+  It uses Home Assistant's Bluetooth stack (`bleak-retry-connector`) and a
+  vendored copy of `hapble` kept in sync by `scripts/sync_vendored.py`.
+  Not yet validated end to end on real hardware from Home Assistant.
+- hassfest and HACS validation workflow.
 - BLE transport and HAP-BLE PDU framing on top of `bleak`, including
   request/response fragmentation across multiple GATT reads.
 - Pair-Setup (SRP-6a + Ed25519), verified against the official HAP
