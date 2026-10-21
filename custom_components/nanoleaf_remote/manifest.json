@@ -7,9 +7,6 @@
       "connectable": true
     }
   ],
-  "categories": [
-    "buttons_remotes"
-  ],
   "codeowners": [
     "@Jeromearsene"
   ],
