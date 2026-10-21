@@ -16,6 +16,7 @@ each phase, including the dead ends and what confirmed each fix.
   `face_12`), reconnection with backoff, per-remote events and availability.
   It uses Home Assistant's Bluetooth stack (`bleak-retry-connector`) and a
   vendored copy of `hapble` kept in sync by `scripts/sync_vendored.py`.
+  Pairs with the setup code or reuses an existing `pairing.json`.
   Not yet validated end to end on real hardware from Home Assistant.
 - hassfest and HACS validation workflow.
 - BLE transport and HAP-BLE PDU framing on top of `bleak`, including

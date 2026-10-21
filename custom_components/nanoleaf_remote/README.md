@@ -9,6 +9,12 @@ Pairs a Nanoleaf Remote directly through Home Assistant's own Bluetooth stack (l
 3. Turn the Remote to wake it. Home Assistant should offer it as a discovered device; otherwise add **Nanoleaf Remote** in Settings → Devices & services.
 4. Enter the 8-digit HomeKit setup code printed on the Remote.
 
+If the Remote is not listed, type its Bluetooth address (printed in the `hapble` tools output, e.g. `D6:BD:09:C0:32:1D`). You can check that Home Assistant sees it in Settings → Devices & services → Bluetooth → Configure → Advertisement monitor.
+
+### Already paired with the `hapble` tools?
+
+If you already ran `poetry run phase2` and have a `pairing.json`, the Remote is still paired with that file and will refuse a second pairing. Choose **Reuse an existing pairing** in the setup flow and paste the content of `pairing.json`: Home Assistant checks it against the Remote, then keeps it. Do not run the `hapble` tools against the same Remote at the same time (it accepts only one connection).
+
 ## Using it
 
 Create an automation with an **Event** trigger on the entity and match `event_type` (`face_1` … `face_12`). The face number follows the order of the Remote's switch characteristics (instance index + 1). Run `poetry run calibrate` from the repository to check which physical face maps to which number.

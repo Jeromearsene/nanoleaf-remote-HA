@@ -4,7 +4,23 @@
     "step": {
       "user": {
         "title": "Nanoleaf Remote",
-        "description": "Avant de continuer, supprimez la télécommande d'Apple Maison : elle n'accepte qu'un seul contrôleur. Choisissez ensuite la télécommande et saisissez le code HomeKit à 8 chiffres imprimé dessus.",
+        "description": "Comment voulez-vous lier la télécommande ?",
+        "menu_options": {
+          "pair": "Appairer avec le code d'appairage",
+          "import_pairing": "Réutiliser un appairage existant (pairing.json)"
+        }
+      },
+      "discovered": {
+        "title": "{name}",
+        "description": "Comment voulez-vous lier cette télécommande ?",
+        "menu_options": {
+          "confirm": "Appairer avec le code d'appairage",
+          "import_pairing": "Réutiliser un appairage existant (pairing.json)"
+        }
+      },
+      "pair": {
+        "title": "Appairer la télécommande",
+        "description": "Supprimez d'abord la télécommande d'Apple Maison : elle n'accepte qu'un seul contrôleur. Choisissez la télécommande ou saisissez son adresse Bluetooth, puis le code HomeKit à 8 chiffres imprimé dessus.",
         "data": {
           "address": "Adresse Bluetooth",
           "setup_code": "Code d'appairage (XXX-XX-XXX ou 8 chiffres)"
@@ -15,6 +31,14 @@
         "description": "Supprimez d'abord la télécommande d'Apple Maison : elle n'accepte qu'un seul contrôleur. Saisissez ensuite le code HomeKit à 8 chiffres imprimé dessus.",
         "data": {
           "setup_code": "Code d'appairage (XXX-XX-XXX ou 8 chiffres)"
+        }
+      },
+      "import_pairing": {
+        "title": "Réutiliser un appairage existant",
+        "description": "Collez le contenu du fichier pairing.json créé avec les outils hapble. Il contient une clé privée : elle n'est stockée que dans ce Home Assistant. La télécommande doit toujours être appairée avec ce fichier (vérifié maintenant).",
+        "data": {
+          "address": "Adresse Bluetooth",
+          "pairing_json": "Contenu de pairing.json"
         }
       }
     },
@@ -27,7 +51,9 @@
       "already_paired": "La télécommande refuse un nouvel appairage. Supprimez-la d'Apple Maison (ou de tout autre contrôleur) puis réessayez.",
       "too_many_attempts": "Trop de tentatives. Patientez quelques minutes avant de réessayer.",
       "busy": "La télécommande est occupée. Réessayez dans un instant.",
-      "pairing_failed": "Échec de l'appairage. Consultez les journaux de Home Assistant."
+      "pairing_failed": "Échec de l'appairage. Consultez les journaux de Home Assistant.",
+      "invalid_pairing_json": "Ce n'est pas un pairing.json valide (les cinq clés en base64 écrites par les outils hapble sont attendues).",
+      "pairing_rejected": "La télécommande refuse cet appairage : elle n'est plus appairée avec ce fichier. Appairez-la avec son code d'appairage."
     },
     "abort": {
       "already_configured": "Cette télécommande est déjà configurée."

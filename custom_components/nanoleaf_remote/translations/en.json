@@ -4,7 +4,23 @@
     "step": {
       "user": {
         "title": "Nanoleaf Remote",
-        "description": "Before continuing, remove the Remote from Apple Home: it only accepts one controller. Then choose the Remote and enter the 8-digit HomeKit setup code printed on it.",
+        "description": "How do you want to link the Remote?",
+        "menu_options": {
+          "pair": "Pair with the setup code",
+          "import_pairing": "Reuse an existing pairing (pairing.json)"
+        }
+      },
+      "discovered": {
+        "title": "{name}",
+        "description": "How do you want to link this Remote?",
+        "menu_options": {
+          "confirm": "Pair with the setup code",
+          "import_pairing": "Reuse an existing pairing (pairing.json)"
+        }
+      },
+      "pair": {
+        "title": "Pair the Remote",
+        "description": "Remove the Remote from Apple Home first: it only accepts one controller. Pick the Remote or type its Bluetooth address, then enter the 8-digit HomeKit setup code printed on it.",
         "data": {
           "address": "Bluetooth address",
           "setup_code": "Setup code (XXX-XX-XXX or 8 digits)"
@@ -15,6 +31,14 @@
         "description": "Remove the Remote from Apple Home first: it only accepts one controller. Then enter the 8-digit HomeKit setup code printed on it.",
         "data": {
           "setup_code": "Setup code (XXX-XX-XXX or 8 digits)"
+        }
+      },
+      "import_pairing": {
+        "title": "Reuse an existing pairing",
+        "description": "Paste the content of the pairing.json file created with the hapble tools. It contains a private key: it is only stored in this Home Assistant. The Remote must still be paired with that file (it is checked now).",
+        "data": {
+          "address": "Bluetooth address",
+          "pairing_json": "Content of pairing.json"
         }
       }
     },
@@ -27,7 +51,9 @@
       "already_paired": "The Remote refuses new pairings. Remove it from Apple Home (or from any other controller) and try again.",
       "too_many_attempts": "Too many attempts. Wait a few minutes before trying again.",
       "busy": "The Remote is busy. Try again in a moment.",
-      "pairing_failed": "Pairing failed. Check the Home Assistant logs for details."
+      "pairing_failed": "Pairing failed. Check the Home Assistant logs for details.",
+      "invalid_pairing_json": "This is not a valid pairing.json (expected the five base64 keys written by the hapble tools).",
+      "pairing_rejected": "The Remote rejected this pairing: it is no longer paired with this file. Pair it with its setup code instead."
     },
     "abort": {
       "already_configured": "This Remote is already configured."

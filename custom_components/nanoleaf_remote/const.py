@@ -6,6 +6,7 @@ PLATFORMS = ["event"]
 CONF_ADDRESS = "address"
 CONF_SETUP_CODE = "setup_code"
 CONF_PAIRING = "pairing"
+CONF_PAIRING_JSON = "pairing_json"
 
 EVENT_TYPES = [f"face_{i}" for i in range(1, 13)]
 
