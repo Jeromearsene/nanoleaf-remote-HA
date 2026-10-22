@@ -46,6 +46,8 @@ jobs:
           python -m py_compile hapble/*.py tools/*.py tests/*.py scripts/*.py custom_components/nanoleaf_remote/*.py
       - name: Vendored hapble copy matches the library
         run: python scripts/sync_vendored.py --check
+      - name: Versions are consistent
+        run: python scripts/check_versions.py
 
   ha-tests:
     name: Home Assistant integration tests
@@ -61,7 +63,7 @@ jobs:
           python -m pip install homeassistant bleak-retry-connector pytest \
             aiousbwatcher habluetooth bluetooth-adapters bluetooth-auto-recovery \
             bluetooth-data-tools dbus-fast pyserial home-assistant-bluetooth
-      - name: Integration tests (calibration, discovery, options flow)
+      - name: Integration tests (calibration, discovery, options flow, diagnostics)
         run: python -m pytest -q tests/ha
 
   # Les outils de `tools/` (phase1 à phase5, calibrate, bridge) ont besoin

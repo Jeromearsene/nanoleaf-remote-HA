@@ -3,7 +3,7 @@
 All notable changes to this project are documented here. Format loosely
 inspired by [Keep a Changelog](https://keepachangelog.com/).
 
-## [0.1.0] — Unreleased
+## [0.1.0] — 2026-10-22
 
 Initial public version. Everything below was built and tested — against a
 real Nanoleaf Remote unless noted otherwise — in a single, heavily
@@ -18,7 +18,9 @@ each phase, including the dead ends and what confirmed each fix.
   vendored copy of `hapble` kept in sync by `scripts/sync_vendored.py`.
   Pairs with the setup code or reuses an existing `pairing.json`.
   Not yet validated end to end on real hardware from Home Assistant.
-- hassfest and HACS validation workflow.
+- hassfest and HACS validation workflow, a release workflow that checks the
+  tag against the integration version, Dependabot, CODEOWNERS, and diagnostics
+  with the pairing keys redacted.
 - Configurable face numbering table (`FACE_MAP`, and the Configure dialog in
   Home Assistant), computed by `poetry run calibrate` from the faces you test,
   or by a guided calibration in the Configure dialog of the integration.

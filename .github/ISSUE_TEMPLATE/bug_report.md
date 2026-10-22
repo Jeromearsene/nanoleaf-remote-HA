@@ -4,13 +4,21 @@ about: Something doesn't work as documented
 labels: bug
 ---
 
-**Which command did you run?**
-(e.g. `poetry run phase2 123-45-678`)
+**Where does it happen?**
+- [ ] Home Assistant integration
+- [ ] Command-line tool (which command? e.g. `poetry run phase2`)
+
+**Home Assistant integration**
+- Home Assistant version and install type (OS, Container...):
+- Bluetooth adapter or ESPHome proxy used:
+- Integration version (HACS):
+- Debug logs (`logger: logs: custom_components.nanoleaf_remote: debug`) and the
+  downloaded diagnostics file (pairing keys are redacted).
 
 **Full output**
-Paste the complete terminal output in a code block. Please double-check it
-doesn't contain your 8-digit setup code or the contents of `pairing.json`
-(see `SECURITY.md`) before pasting.
+Paste the complete output (terminal or Home Assistant log) in a code block.
+Please double-check it doesn't contain your 8-digit setup code or the
+contents of `pairing.json` (see `SECURITY.md`) before pasting.
 
 ```
 paste here

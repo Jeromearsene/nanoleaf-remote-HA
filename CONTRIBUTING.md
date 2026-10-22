@@ -92,3 +92,12 @@ please open an issue with:
 
 Please see `SECURITY.md` before reporting anything sensitive (e.g. a flaw
 that would let someone impersonate a paired controller).
+
+## Releasing
+
+1. Bump the version in `custom_components/nanoleaf_remote/manifest.json` and
+   `pyproject.toml` (`python scripts/check_versions.py` must pass) and move
+   the `CHANGELOG.md` entry out of "Unreleased".
+2. Merge to `main`, then push a tag from `main`: `git tag v0.1.0 && git push
+   origin v0.1.0`. The release workflow checks the tag against the version
+   and publishes the GitHub release that HACS uses for updates.
