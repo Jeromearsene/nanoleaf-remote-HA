@@ -20,7 +20,7 @@
       },
       "pair": {
         "title": "Appairer la télécommande",
-        "description": "Supprimez d'abord la télécommande d'Apple Maison : elle n'accepte qu'un seul contrôleur. Choisissez la télécommande ou saisissez son adresse Bluetooth, puis le code HomeKit à 8 chiffres imprimé dessus.",
+        "description": "Supprimez d'abord la télécommande d'Apple Maison : elle n'accepte qu'un seul contrôleur. Choisissez la télécommande (les accessoires HomeKit à portée sont listés avec leur identifiant) ou saisissez son adresse Bluetooth, puis le code HomeKit à 8 chiffres imprimé dessus.",
         "data": {
           "address": "Adresse Bluetooth",
           "setup_code": "Code d'appairage (XXX-XX-XXX ou 8 chiffres)"
@@ -35,9 +35,9 @@
       },
       "import_pairing": {
         "title": "Réutiliser un appairage existant",
-        "description": "Collez le contenu du fichier pairing.json créé avec les outils hapble. Il contient une clé privée : elle n'est stockée que dans ce Home Assistant. La télécommande doit toujours être appairée avec ce fichier (vérifié maintenant).",
+        "description": "Collez le contenu du fichier pairing.json créé avec les outils hapble. Il contient une clé privée : elle n'est stockée que dans ce Home Assistant. La télécommande est retrouvée grâce à l'identifiant stocké dans le fichier, l'adresse est donc facultative. Elle doit toujours être appairée avec ce fichier (vérifié maintenant).",
         "data": {
-          "address": "Adresse Bluetooth",
+          "address": "Adresse Bluetooth (facultative)",
           "pairing_json": "Contenu de pairing.json"
         }
       }

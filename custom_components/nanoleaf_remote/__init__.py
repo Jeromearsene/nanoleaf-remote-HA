@@ -27,6 +27,7 @@ from .const import (
     signal_event,
     signal_state,
 )
+from .discovery import find_service_info, normalize_device_id
 from .hapble import pair_verify
 from .hapble.ble_session import BleSecureSession
 from .hapble.pairing import PairingResult
@@ -53,6 +54,7 @@ class NanoleafRuntime:
         self.address: str = entry.data[CONF_ADDRESS]
         self.connected = False
         self._pairing = decode_pairing(entry.data[CONF_PAIRING])
+        self._device_id = normalize_device_id(self._pairing.accessory_pairing_id)
         self._task: asyncio.Task | None = None
         self._stopping = False
 
@@ -76,10 +78,23 @@ class NanoleafRuntime:
             self.connected = connected
             async_dispatcher_send(self.hass, signal_state(self.entry.entry_id))
 
-    def _ble_device(self):
-        return bluetooth.async_ble_device_from_address(
+    def ble_device(self):
+        """Current BLEDevice: by stored address, else by HomeKit device ID."""
+        device = bluetooth.async_ble_device_from_address(
             self.hass, self.address, connectable=True
         )
+        if device is None:
+            info = find_service_info(self.hass, None, self._device_id)
+            if info is not None:
+                device = info.device
+                if info.address != self.address:
+                    _LOGGER.info(
+                        "Nanoleaf Remote now advertises as %s (was %s)",
+                        info.address,
+                        self.address,
+                    )
+                    self.address = info.address
+        return device
 
     async def _run(self) -> None:
         """Connect, authenticate and poll, reconnecting with backoff."""
@@ -116,7 +131,7 @@ class NanoleafRuntime:
 
     async def _session(self) -> None:
         """One connection: verify the pairing, then poll until it drops."""
-        device = self._ble_device()
+        device = self.ble_device()
         if device is None:
             raise RuntimeError("not seen by any Home Assistant Bluetooth adapter")
 
@@ -124,7 +139,7 @@ class NanoleafRuntime:
             BleakClientWithServiceCache,
             device,
             self.entry.title,
-            ble_device_callback=lambda: self._ble_device() or device,
+            ble_device_callback=lambda: self.ble_device() or device,
         )
         try:
             accessory = HapBleAccessory(device, client=client)
@@ -163,13 +178,11 @@ class NanoleafRuntime:
 
 async def async_setup_entry(hass: HomeAssistant, entry: NanoleafConfigEntry) -> bool:
     """Set up a configured remote."""
-    address: str = entry.data[CONF_ADDRESS]
-    if bluetooth.async_ble_device_from_address(hass, address, connectable=True) is None:
-        raise ConfigEntryNotReady(
-            f"Nanoleaf Remote {address} is not visible to Home Assistant Bluetooth"
-        )
-
     runtime = NanoleafRuntime(hass, entry)
+    if runtime.ble_device() is None:
+        raise ConfigEntryNotReady(
+            f"Nanoleaf Remote {runtime.address} is not visible to Home Assistant Bluetooth"
+        )
     entry.runtime_data = runtime
     entry.async_on_unload(runtime.async_stop)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
