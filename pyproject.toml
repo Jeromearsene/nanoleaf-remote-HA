@@ -41,6 +41,7 @@ packages = [
     { include = "test_pairing_e2e_fake.py" },
     { include = "test_pair_verify_e2e_fake.py" },
     { include = "test_srp_official_vector.py" },
+    { include = "test_facemap.py" },
     { include = "bridge.py" },
     { include = "calibrate.py" },
 ]
@@ -54,6 +55,7 @@ pre-commit = ">=3.7"
 srp-vector    = "test_srp_official_vector:cli"
 pairing-fake  = "test_pairing_e2e_fake:cli"
 verify-fake   = "test_pair_verify_e2e_fake:cli"
+facemap-test  = "test_facemap:cli"
 # Contre le vrai appareil, dans l'ordre :
 phase1        = "test_phase1:cli"
 phase2        = "test_phase2:cli"

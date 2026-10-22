@@ -21,7 +21,7 @@ import asyncio
 import logging
 import sys
 
-from hapble import pair_verify, pairing_store
+from hapble import facemap, pair_verify, pairing_store
 from hapble.ble_session import BleSecureSession
 from hapble.transport import HapBleAccessory
 from test_phase1 import discover_remote  # noqa: E402
@@ -64,6 +64,20 @@ def summarize(results: list[tuple[int, int]]) -> str:
         lines.append(">>> La correspondance simple 'index = face - 1' ne tient")
         lines.append(">>> apparemment pas partout — regardons ça ensemble avant de")
         lines.append(">>> se fier au pont MQTT pour de vraies automatisations.")
+        face_map, notes = facemap.suggest_face_map(results)
+        lines.append("")
+        if face_map is not None:
+            text = facemap.format_face_map(face_map)
+            lines.append(
+                "Table de correspondance trouvée (position détectée -> face) :"
+            )
+            lines.append(f"  {text}")
+            lines.append("")
+            lines.append("  -> Home Assistant : Paramètres > Appareils et services >")
+            lines.append("     Nanoleaf Remote > Configurer, et collez cette table.")
+            lines.append(f"  -> Pont MQTT : ajoutez FACE_MAP={text} à votre .env")
+        else:
+            lines.extend(notes)
     else:
         lines.append("")
         lines.append(">>> Correspondance confirmée sur toutes les faces testées.")

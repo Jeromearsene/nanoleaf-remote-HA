@@ -17,7 +17,7 @@ If you already ran `poetry run phase2` and have a `pairing.json`, the Remote is 
 
 ## Using it
 
-Create an automation with an **Event** trigger on the entity and match `event_type` (`face_1` … `face_12`). The face number follows the order of the Remote's switch characteristics (instance index + 1). Run `poetry run calibrate` from the repository to check which physical face maps to which number.
+Create an automation with an **Event** trigger on the entity and match `event_type` (`face_1` … `face_12`). By default the face number is the detected position (switch instance index + 1), which may not match the numbering you expect. Run `poetry run calibrate` from the repository (Remote near the computer, test all 12 faces): it prints a table. Then open Settings → Devices & services → Nanoleaf Remote → **Configure** and paste it (12 comma-separated numbers, the Nth being the real face for the Nth detected position). The same table works for the MQTT bridge as `FACE_MAP` in `.env`.
 
 ## Status and limitations
 

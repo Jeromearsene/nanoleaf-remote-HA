@@ -14,6 +14,7 @@ Configuration (environment variables, all optional — can also be set in a
     MQTT_PORT       (default: 1883)
     MQTT_USERNAME   (default: no authentication)
     MQTT_PASSWORD
+    FACE_MAP        (default: 1,2,...,12; table given by `poetry run calibrate`)
 
 Usage:
     poetry run bridge
@@ -27,7 +28,7 @@ import sys
 import aiomqtt
 from dotenv import load_dotenv
 
-from hapble import mqtt_bridge, pair_verify, pairing_store
+from hapble import facemap, mqtt_bridge, pair_verify, pairing_store
 from hapble.ble_session import BleSecureSession
 from hapble.transport import HapBleAccessory
 from test_phase1 import discover_remote  # noqa: E402
@@ -71,12 +72,14 @@ async def _ble_session(mqtt_client: aiomqtt.Client, pairing) -> None:
         )
         logger.info("%d instance(s) ProgrammableSwitchEvent.", len(switch_chars))
 
+        face_map = facemap.parse_face_map(os.environ.get("FACE_MAP"))
+
         async def publish_event(face_index: int) -> None:
             await mqtt_client.publish(
                 mqtt_bridge.STATE_TOPIC,
-                mqtt_bridge.event_state_payload(face_index),
+                mqtt_bridge.event_state_payload(face_index, face_map),
             )
-            logger.info("Événement publié : face %d", face_index + 1)
+            logger.info("Événement publié : face %d", face_map[face_index])
 
         def on_event(index: int, decoded, raw: bytes) -> None:
             # L'indication elle-même est vide en pratique (confirmé en

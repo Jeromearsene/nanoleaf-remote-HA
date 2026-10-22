@@ -54,7 +54,10 @@ def discovery_payload(device_identifier: str) -> str:
     return json.dumps(payload)
 
 
-def event_state_payload(face_index: int) -> str:
+def event_state_payload(
+    face_index: int, face_map: tuple[int, ...] | None = None
+) -> str:
     """`face_index` : 0-indexé (comme partout dans ce projet — voir la
     correspondance confirmée en Phase 4 : index = numéro de face - 1)."""
-    return json.dumps({"event_type": f"face_{face_index + 1}"})
+    face = face_index + 1 if face_map is None else face_map[face_index]
+    return json.dumps({"event_type": f"face_{face}"})
