@@ -33,6 +33,7 @@ from .const import (
     PAIRING_TIMEOUT,
     VERIFY_TIMEOUT,
 )
+from .discovery import find_service_info, homekit_device_id, normalize_device_id
 from .hapble import pair_verify, pairing, uuids
 from .hapble.srp import SrpAuthenticationError
 from .hapble.transport import HapBleAccessory
@@ -85,24 +86,34 @@ class NanoleafRemoteConfigFlow(ConfigFlow, domain=DOMAIN):
     # -- helpers ---------------------------------------------------------
 
     def _address_selector(self) -> SelectSelector:
-        """Dropdown of nearby Remotes that also accepts a typed address."""
+        """Dropdown of nearby candidates that also accepts a typed address.
+
+        Lists devices named "Nanoleaf Remote" and every HomeKit BLE accessory
+        in range, labelled with its HomeKit device ID (the ID of the Remote is
+        printed by the hapble tools and stored in pairing.json).
+        """
         current = self._async_current_ids()
-        options = [
-            SelectOptionDict(value=info.address, label=f"{info.name} ({info.address})")
-            for info in bluetooth.async_discovered_service_info(self.hass, False)
-            if _is_nanoleaf_remote(info) and info.address not in current
-        ]
+        options = []
+        for info in bluetooth.async_discovered_service_info(self.hass, False):
+            device_id = homekit_device_id(info)
+            if info.address in current or not (_is_nanoleaf_remote(info) or device_id):
+                continue
+            label = info.name or "HomeKit accessory"
+            if device_id:
+                label += f" - ID {device_id}"
+            options.append(
+                SelectOptionDict(value=info.address, label=f"{label} ({info.address})")
+            )
         return SelectSelector(
             SelectSelectorConfig(options=options, custom_value=True, sort=True)
         )
 
-    def _device(self, address: str):
-        device = bluetooth.async_ble_device_from_address(
-            self.hass, address, connectable=True
-        )
-        if device is None:
+    def _device(self, address: str | None, device_id: str | None = None):
+        """Resolve the BLEDevice by address, else by HomeKit device ID."""
+        info = find_service_info(self.hass, address, device_id)
+        if info is None:
             raise FlowError("device_not_found")
-        return device
+        return info.device
 
     async def _async_pair(self, address: str, setup_code: str) -> dict[str, str]:
         """Run HomeKit Pair-Setup and return the keys to store."""
@@ -140,12 +151,19 @@ class NanoleafRemoteConfigFlow(ConfigFlow, domain=DOMAIN):
             for key in PAIRING_KEYS
         }
 
-    async def _async_verify(self, address: str, pairing_data: dict[str, str]) -> None:
-        """Check that an existing pairing is still accepted by the Remote."""
-        device = self._device(address)
+    async def _async_verify(
+        self, address: str | None, pairing_data: dict[str, str]
+    ) -> str:
+        """Check that an existing pairing is still accepted; return the address."""
         stored = pairing.PairingResult(
             **{key: base64.b64decode(value) for key, value in pairing_data.items()}
         )
+        info = find_service_info(
+            self.hass, address, normalize_device_id(stored.accessory_pairing_id)
+        )
+        if info is None:
+            raise FlowError("device_not_found")
+        device = info.device
         client = None
         try:
             client = await establish_connection(
@@ -168,6 +186,7 @@ class NanoleafRemoteConfigFlow(ConfigFlow, domain=DOMAIN):
             raise FlowError("cannot_connect") from err
         finally:
             await self._async_disconnect(client)
+        return info.address
 
     @staticmethod
     async def _async_disconnect(client) -> None:
@@ -289,15 +308,17 @@ class NanoleafRemoteConfigFlow(ConfigFlow, domain=DOMAIN):
         errors: dict[str, str] = {}
         fixed = self._discovery.address if self._discovery else None
         if user_input is not None:
-            address = (fixed or user_input[CONF_ADDRESS]).strip().upper()
-            await self.async_set_unique_id(address)
-            self._abort_if_unique_id_configured()
+            typed = (fixed or user_input.get(CONF_ADDRESS) or "").strip().upper()
             try:
                 data = _parse_pairing_json(user_input[CONF_PAIRING_JSON])
-                await self._async_verify(address, data)
+                # The address is optional: the Remote is found by the device
+                # ID stored in the pairing when none is given.
+                address = await self._async_verify(typed or None, data)
             except FlowError as err:
                 errors["base"] = err.reason
             else:
+                await self.async_set_unique_id(address.upper())
+                self._abort_if_unique_id_configured()
                 name = (self._discovery.name if self._discovery else None) or (
                     LOCAL_NAME_PREFIX
                 )
@@ -305,7 +326,7 @@ class NanoleafRemoteConfigFlow(ConfigFlow, domain=DOMAIN):
 
         schema: dict[Any, Any] = {}
         if fixed is None:
-            schema[vol.Required(CONF_ADDRESS)] = self._address_selector()
+            schema[vol.Optional(CONF_ADDRESS)] = self._address_selector()
         schema[vol.Required(CONF_PAIRING_JSON)] = TextSelector(
             TextSelectorConfig(multiline=True)
         )

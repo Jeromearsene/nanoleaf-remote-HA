@@ -20,7 +20,7 @@
       },
       "pair": {
         "title": "Pair the Remote",
-        "description": "Remove the Remote from Apple Home first: it only accepts one controller. Pick the Remote or type its Bluetooth address, then enter the 8-digit HomeKit setup code printed on it.",
+        "description": "Remove the Remote from Apple Home first: it only accepts one controller. Pick the Remote (HomeKit accessories in range are listed with their device ID) or type its Bluetooth address, then enter the 8-digit HomeKit setup code printed on it.",
         "data": {
           "address": "Bluetooth address",
           "setup_code": "Setup code (XXX-XX-XXX or 8 digits)"
@@ -35,9 +35,9 @@
       },
       "import_pairing": {
         "title": "Reuse an existing pairing",
-        "description": "Paste the content of the pairing.json file created with the hapble tools. It contains a private key: it is only stored in this Home Assistant. The Remote must still be paired with that file (it is checked now).",
+        "description": "Paste the content of the pairing.json file created with the hapble tools. It contains a private key: it is only stored in this Home Assistant. The Remote is found from the device ID stored in the file, so the address is optional. It must still be paired with that file (checked now).",
         "data": {
-          "address": "Bluetooth address",
+          "address": "Bluetooth address (optional)",
           "pairing_json": "Content of pairing.json"
         }
       }
