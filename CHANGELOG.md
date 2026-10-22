@@ -7,7 +7,7 @@ inspired by [Keep a Changelog](https://keepachangelog.com/).
 
 Initial public version. Everything below was built and tested — against a
 real Nanoleaf Remote unless noted otherwise — in a single, heavily
-iterative reverse-engineering effort; see `README.md` for the full story of
+iterative reverse-engineering effort; see `docs/hapble.md` for the full story of
 each phase, including the dead ends and what confirmed each fix.
 
 ### Added
