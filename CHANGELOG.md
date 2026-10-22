@@ -17,7 +17,7 @@ each phase, including the dead ends and what confirmed each fix.
   It uses Home Assistant's Bluetooth stack (`bleak-retry-connector`) and a
   vendored copy of `hapble` kept in sync by `scripts/sync_vendored.py`.
   Pairs with the setup code or reuses an existing `pairing.json`.
-  Not yet validated end to end on real hardware from Home Assistant.
+  Validated end to end on a real Remote from Home Assistant.
 - hassfest and HACS validation workflow, a release workflow that checks the
   tag against the integration version, Dependabot, CODEOWNERS, and diagnostics
   with the pairing keys redacted.
