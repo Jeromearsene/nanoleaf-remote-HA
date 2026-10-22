@@ -18,6 +18,10 @@ POLL_INTERVAL = 1.5
 RECONNECT_MIN_DELAY = 3.0
 RECONNECT_MAX_DELAY = 60.0
 
+# How long the setup flow waits for the Remote to be heard: it only
+# advertises while it is awake, so the user turns it during this window.
+WAIT_FOR_REMOTE = 30
+
 # Bounds the pairing handshake so a stalled link cannot hang the flow.
 PAIRING_TIMEOUT = 60.0
 VERIFY_TIMEOUT = 30.0

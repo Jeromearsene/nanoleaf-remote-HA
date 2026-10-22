@@ -32,8 +32,13 @@ from .const import (
     LOCAL_NAME_PREFIX,
     PAIRING_TIMEOUT,
     VERIFY_TIMEOUT,
+    WAIT_FOR_REMOTE,
 )
-from .discovery import find_service_info, homekit_device_id, normalize_device_id
+from .discovery import (
+    async_wait_for_service_info,
+    homekit_device_id,
+    normalize_device_id,
+)
 from .hapble import pair_verify, pairing, uuids
 from .hapble.srp import SrpAuthenticationError
 from .hapble.transport import HapBleAccessory
@@ -108,16 +113,18 @@ class NanoleafRemoteConfigFlow(ConfigFlow, domain=DOMAIN):
             SelectSelectorConfig(options=options, custom_value=True, sort=True)
         )
 
-    def _device(self, address: str | None, device_id: str | None = None):
-        """Resolve the BLEDevice by address, else by HomeKit device ID."""
-        info = find_service_info(self.hass, address, device_id)
+    async def _async_find(self, address: str | None, device_id: str | None = None):
+        """Resolve the BLEDevice, waiting for the Remote to wake and advertise."""
+        info = await async_wait_for_service_info(
+            self.hass, address, device_id, WAIT_FOR_REMOTE
+        )
         if info is None:
             raise FlowError("device_not_found")
-        return info.device
+        return info
 
     async def _async_pair(self, address: str, setup_code: str) -> dict[str, str]:
         """Run HomeKit Pair-Setup and return the keys to store."""
-        device = self._device(address)
+        device = (await self._async_find(address)).device
         client = None
         try:
             client = await establish_connection(
@@ -158,11 +165,9 @@ class NanoleafRemoteConfigFlow(ConfigFlow, domain=DOMAIN):
         stored = pairing.PairingResult(
             **{key: base64.b64decode(value) for key, value in pairing_data.items()}
         )
-        info = find_service_info(
-            self.hass, address, normalize_device_id(stored.accessory_pairing_id)
+        info = await self._async_find(
+            address, normalize_device_id(stored.accessory_pairing_id)
         )
-        if info is None:
-            raise FlowError("device_not_found")
         device = info.device
         client = None
         try:

@@ -9,9 +9,16 @@ the Remote even when its Bluetooth address is random or changes.
 
 from __future__ import annotations
 
+import logging
+
 from homeassistant.components import bluetooth
-from homeassistant.components.bluetooth import BluetoothServiceInfoBleak
+from homeassistant.components.bluetooth import (
+    BluetoothScanningMode,
+    BluetoothServiceInfoBleak,
+)
 from homeassistant.core import HomeAssistant
+
+_LOGGER = logging.getLogger(__name__)
 
 APPLE_COMPANY_ID = 0x004C
 HOMEKIT_ADV_TYPE = 0x06
@@ -58,3 +65,50 @@ def find_service_info(
             if homekit_device_id(info) == device_id:
                 return info
     return None
+
+
+async def async_wait_for_service_info(
+    hass: HomeAssistant,
+    address: str | None,
+    device_id: str | None,
+    timeout: int,
+) -> BluetoothServiceInfoBleak | None:
+    """Return the Remote's advertisement, waiting up to `timeout` seconds.
+
+    The Remote only advertises while it is awake, so it may not be in
+    Home Assistant's cache yet: wait for the next matching advertisement.
+    """
+    found = find_service_info(hass, address, device_id)
+    if found is not None:
+        return found
+    if device_id:
+        matcher = {
+            "manufacturer_id": APPLE_COMPANY_ID,
+            "manufacturer_data_start": [HOMEKIT_ADV_TYPE],
+            "connectable": True,
+        }
+    elif address:
+        matcher = {"address": address.upper(), "connectable": True}
+    else:
+        return None
+
+    def _matches(info: BluetoothServiceInfoBleak) -> bool:
+        if address and info.address.upper() == address.upper():
+            return True
+        return bool(device_id) and homekit_device_id(info) == device_id
+
+    try:
+        return await bluetooth.async_process_advertisements(
+            hass, _matches, matcher, BluetoothScanningMode.ACTIVE, timeout
+        )
+    except TimeoutError:
+        seen = sum(1 for i in bluetooth.async_discovered_service_info(hass, False))
+        _LOGGER.warning(
+            "Nanoleaf Remote (address %s, device ID %s) not heard in %d s; "
+            "Home Assistant currently sees %d Bluetooth devices",
+            address,
+            device_id,
+            timeout,
+            seen,
+        )
+        return None

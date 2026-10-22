@@ -43,7 +43,7 @@
       }
     },
     "error": {
-      "device_not_found": "The Remote is not visible to Home Assistant Bluetooth. Wake it by turning it and check the range of your Bluetooth adapter or proxy.",
+      "device_not_found": "The Remote was not heard by Home Assistant Bluetooth. It only advertises while awake: turn it continuously right after pressing Submit (Home Assistant waits 30 s), close to the Bluetooth adapter. If it still fails, check the Advertisement monitor in the Bluetooth integration.",
       "cannot_connect": "Could not connect to the Remote. Try again while turning it gently to keep it awake.",
       "timeout": "The pairing took too long. Try again.",
       "invalid_setup_code": "The setup code must contain 8 digits.",
