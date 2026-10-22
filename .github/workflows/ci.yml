@@ -39,22 +39,32 @@ jobs:
         run: pipx install poetry
       - name: Install dependencies
         run: poetry install --no-interaction
-      - name: SRP implementation vs. official Apple test vector
-        run: poetry run srp-vector
-      - name: Full Pair-Setup against a simulated accessory
-        run: poetry run pairing-fake
-      - name: Full Pair-Verify against a simulated accessory
-        run: poetry run verify-fake
-      - name: Face numbering table
-        run: poetry run facemap-test
+      - name: Protocol tests (official SRP vector, simulated accessory, face table)
+        run: poetry run pytest -q
       - name: Byte-compile every module (catches syntax errors)
         run: |
-          python -m py_compile hapble/*.py *.py scripts/*.py custom_components/nanoleaf_remote/*.py
+          python -m py_compile hapble/*.py tools/*.py tests/*.py scripts/*.py custom_components/nanoleaf_remote/*.py
       - name: Vendored hapble copy matches the library
         run: python scripts/sync_vendored.py --check
 
-  # Ces trois commandes-ci ont besoin d'un vrai Bluetooth et d'une vraie
-  # Nanoleaf Remote — elles ne peuvent pas tourner en CI. Voir docs/hapble.md
-  # (section "Project status") pour ce qui a été validé contre du vrai
-  # matériel et comment le reproduire soi-même : phase1, phase2, phase3,
-  # phase4, phase5, calibrate, bridge.
+  ha-tests:
+    name: Home Assistant integration tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Install Home Assistant and test dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install homeassistant bleak-retry-connector pytest \
+            aiousbwatcher habluetooth bluetooth-adapters bluetooth-auto-recovery \
+            bluetooth-data-tools dbus-fast pyserial home-assistant-bluetooth
+      - name: Integration tests (calibration, discovery, options flow)
+        run: python -m pytest -q tests/ha
+
+  # Les outils de `tools/` (phase1 à phase5, calibrate, bridge) ont besoin
+  # d'un vrai Bluetooth et d'une vraie Nanoleaf Remote — ils ne peuvent pas
+  # tourner en CI. Voir docs/hapble.md (section "Project status") pour ce
+  # qui a été validé contre du vrai matériel et comment le reproduire.

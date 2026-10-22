@@ -18,7 +18,7 @@ faible si ça marche) :
   - sinon -> une relecture explicite est faite juste après.
 
 Usage :
-    python test_phase5.py [durée_en_secondes]   (défaut : 30s)
+    python -m tools.phase5 [durée_en_secondes]   (défaut : 30s)
 
 Pendant l'exécution : fais tourner la Remote plusieurs fois, vers
 différentes faces, pour voir plusieurs événements arriver.
@@ -31,7 +31,7 @@ import sys
 from hapble import pair_verify, pairing_store
 from hapble.ble_session import BleSecureSession
 from hapble.transport import HapBleAccessory
-from test_phase1 import discover_remote  # noqa: E402
+from tools.phase1 import discover_remote  # noqa: E402
 
 LOG_LEVEL = logging.DEBUG
 DEFAULT_LISTEN_SECONDS = 30.0

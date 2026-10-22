@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-import sys
-
 from hapble import facemap
 
 
@@ -15,7 +13,7 @@ def _rejects(text: str) -> bool:
     return False
 
 
-def run() -> int:
+def test_face_map() -> None:
     assert facemap.parse_face_map("") == facemap.IDENTITY
     assert facemap.parse_face_map(None) == facemap.IDENTITY
     shifted = facemap.parse_face_map("12,1,2,3,4,5,6,7,8,9,10,11")
@@ -34,13 +32,3 @@ def run() -> int:
     assert partial is None and notes
     conflict, notes = facemap.suggest_face_map([(2, 1), (3, 1)])
     assert conflict is None and notes
-    print("OK : table de correspondance des faces")
-    return 0
-
-
-def cli() -> None:
-    sys.exit(run())
-
-
-if __name__ == "__main__":
-    cli()

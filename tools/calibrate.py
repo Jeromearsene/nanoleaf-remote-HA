@@ -1,5 +1,5 @@
 """
-calibrate.py — outil de calibration interactif : pour chaque essai, TU
+tools/calibrate.py — outil de calibration interactif : pour chaque essai, TU
 indiques sur quelle face tu vas tourner, PUIS tu tournes, et le script
 confirme (ou contredit) ce qui a été réellement détecté.
 
@@ -24,7 +24,7 @@ import sys
 from hapble import facemap, pair_verify, pairing_store
 from hapble.ble_session import BleSecureSession
 from hapble.transport import HapBleAccessory
-from test_phase1 import discover_remote  # noqa: E402
+from tools.phase1 import discover_remote  # noqa: E402
 
 LOG_LEVEL = logging.WARNING  # peu de bruit : on veut voir le dialogue clairement
 POLL_INTERVAL_SECONDS = 1.5

@@ -63,7 +63,7 @@ firmware, *before* investing time in the cryptography.
 - Full M1→M6 state machine (`pairing.py`).
 - Result persisted (`pairing_store.py`) to `pairing.json`.
 - **Verified end-to-end against a pure-Python simulated accessory**
-  (`test_pairing_e2e_fake.py`, needs no hardware): the happy path succeeds
+  (`tests/test_pairing_e2e_fake.py`, needs no hardware): the happy path succeeds
   with client/accessory cross-checks, and the error path (wrong code) is
   correctly rejected.
 - **PDU-level fragmentation of large responses (`continuation` bit)**:
@@ -95,12 +95,12 @@ an otherwise-reliable source, but it wasn't sufficient on its own.)*
   (section 5.7), fetched and read in full for this project — no
   guesswork like the back-and-forth that Pair-Setup's SRP proof required.
 - Verified end-to-end against a simulated accessory
-  (`test_pair_verify_e2e_fake.py`): identical session keys computed
+  (`tests/test_pair_verify_e2e_fake.py`): identical session keys computed
   independently on both sides, and correct rejection of an unexpected
   accessory identifier (protection against a spoofed/different
   accessory).
 - **Bonus**: the *official* SRP test vector from the Apple spec (section
-  5.5.2) is now a permanent regression test (`test_srp_official_vector.py`)
+  5.5.2) is now a permanent regression test (`tests/test_srp_official_vector.py`)
   — v, A, B, S, K checked exactly against the values Apple itself
   publishes, independent of any hardware. The vectors are reconstructed
   programmatically from the spec's raw text (not hand-typed, out of
@@ -126,7 +126,7 @@ an otherwise-reliable source, but it wasn't sufficient on its own.)*
 characteristics have the GATT `indicate` property (spotted in Phase 1) —
 a plain direct read might return nothing if the accessory instead expects
 a BLE indication subscription (via the `0x2902` CCCD descriptor), which
-wasn't implemented yet. `test_phase4.py` tries the direct read first
+wasn't implemented yet. `tools/phase4.py` tries the direct read first
 (simpler, reuses everything already built) and documents this point if it
 comes back empty.
 
@@ -162,7 +162,7 @@ guaranteed otherwise (worst-case latency ~1.5s).
 ### ✅ Calibration — interactive face-by-face verification
 
 The "index = face − 1" mapping had only been checked against 2 data
-points (Phase 4: faces 2 and 9). `calibrate.py` lets you verify it
+points (Phase 4: faces 2 and 9). `tools/calibrate.py` lets you verify it
 explicitly, as many times as you like, before relying on it for real Home
 Assistant automations: for each trial, you state which face you're about
 to test, then rotate — the script confirms or flags a mismatch, and gives
@@ -186,7 +186,7 @@ simulating Home Assistant to confirm the message format.
   `homeassistant/event/nanoleaf_remote_rotation/config`, 12 `event_types`
   `face_1`...`face_12`, grouped under a "Nanoleaf Remote" device in the
   Home Assistant UI) and the state payload (`{"event_type": "face_N"}`).
-- `bridge.py`: an indefinite BLE reconnection loop wrapped around Phase
+- `tools/bridge.py`: an indefinite BLE reconnection loop wrapped around Phase
   5's logic, publishing to MQTT on every detected event (indication or
   polling).
 - **Concurrency fix** added at this point: the polling loop and the
@@ -240,14 +240,14 @@ Expected result: the list of the Remote's GATT services/characteristics
 then the value of `Pairing Features`.
 
 To see every exchanged frame in hex (useful when troubleshooting): set
-`LOG_LEVEL = logging.DEBUG` near the top of `test_phase1.py`.
+`LOG_LEVEL = logging.DEBUG` near the top of `tools/phase1.py`.
 
 ## Running Phase 2 (Pair-Setup)
 
 First, with no hardware, to validate the internal logic:
 
 ```bash
-poetry run pairing-fake
+poetry run pytest tests/test_pairing_e2e_fake.py
 ```
 
 Then against the real device (8-digit code required — label under the
@@ -267,7 +267,7 @@ M6 succeeds.
 First, with no hardware:
 
 ```bash
-poetry run verify-fake
+poetry run pytest tests/test_pair_verify_e2e_fake.py
 ```
 
 Then against the real device (needs an existing `pairing.json`, produced
@@ -281,7 +281,7 @@ Also worth running any time (no hardware needed, checks `srp.py` against
 Apple's official test vector):
 
 ```bash
-poetry run srp-vector
+poetry run pytest tests/test_srp_official_vector.py
 ```
 
 ## Running Phase 4 (encrypted session + reading an event)
@@ -338,9 +338,9 @@ trigger on this entity, filtered on the `event_type` attribute).
 
 | Command | Needs hardware? | What it does |
 |---|:---:|---|
-| `poetry run srp-vector` | No | Checks `srp.py` against Apple's official test vector |
-| `poetry run pairing-fake` | No | Full Pair-Setup against a simulated accessory |
-| `poetry run verify-fake` | No | Full Pair-Verify against a simulated accessory |
+| `poetry run pytest tests/test_srp_official_vector.py` | No | Checks `srp.py` against Apple's official test vector |
+| `poetry run pytest tests/test_pairing_e2e_fake.py` | No | Full Pair-Setup against a simulated accessory |
+| `poetry run pytest tests/test_pair_verify_e2e_fake.py` | No | Full Pair-Verify against a simulated accessory |
 | `poetry run phase1` | Yes | HAP-BLE transport/framing (Pairing Features) |
 | `poetry run phase2 <code>` | Yes | Real Pair-Setup (8-digit code) |
 | `poetry run phase3` | Yes | Real Pair-Verify (reuses `pairing.json`) |

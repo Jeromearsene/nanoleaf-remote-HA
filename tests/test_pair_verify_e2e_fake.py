@@ -1,7 +1,7 @@
 """
 Simule un accessoire HAP côté "serveur" pour Pair-Verify, en Python pur,
 pour valider hapble.pair_verify de bout en bout sans matériel réel — même
-démarche que test_pairing_e2e_fake.py pour Pair-Setup.
+démarche que tests/test_pairing_e2e_fake.py pour Pair-Setup.
 
 Ce faux accessoire "connaît" à l'avance le résultat d'un Pair-Setup (LTPK du
 controller, sa propre paire LTSK/LTPK) — exactement l'état dans lequel se
@@ -10,8 +10,6 @@ trouverait un vrai accessoire après un Pair-Setup réussi.
 
 import asyncio
 import sys
-
-sys.path.insert(0, ".")
 
 from hapble import crypto_hap, pair_verify, tlv8, uuids  # noqa: E402
 from hapble.pairing import PairingResult  # noqa: E402
@@ -185,10 +183,5 @@ async def main():
     print("TOUS LES TESTS PAIR-VERIFY SONT PASSES.")
 
 
-def cli() -> None:
-    """Point d'entrée synchrone, pour `poetry run` (voir pyproject.toml)."""
+def test_pair_verify_end_to_end_against_fake_accessory() -> None:
     asyncio.run(main())
-
-
-if __name__ == "__main__":
-    cli()

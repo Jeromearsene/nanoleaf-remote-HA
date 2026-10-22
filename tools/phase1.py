@@ -32,7 +32,7 @@ d'analyse initial), quel que soit l'OS.
 
 Usage :
     pip install bleak
-    python test_phase1.py
+    python -m tools.phase1
 
 Sous macOS, si le scan ne trouve rien du tout (aucun appareil, pas
 seulement la Remote), vérifier Réglages Système -> Confidentialité et

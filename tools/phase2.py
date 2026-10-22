@@ -16,8 +16,8 @@ BleakError — dans ce cas, relance simplement (aucun état n'est corrompu
 côté accessoire tant que M6 n'a pas été reçu avec succès).
 
 Usage :
-    python test_phase2.py                  # demande le code interactivement
-    python test_phase2.py 123-45-678        # ou en argument
+    python -m tools.phase2                  # demande le code interactivement
+    python -m tools.phase2 123-45-678        # ou en argument
 """
 
 import asyncio
@@ -29,7 +29,7 @@ from hapble import pairing, pairing_store
 from hapble.transport import HapBleAccessory, HapBleError
 
 # Réutilise la logique de découverte de la Phase 1.
-from test_phase1 import discover_remote  # noqa: E402
+from tools.phase1 import discover_remote  # noqa: E402
 
 LOG_LEVEL = logging.INFO
 

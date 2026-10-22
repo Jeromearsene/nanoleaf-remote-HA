@@ -34,8 +34,8 @@ each phase, including the dead ends and what confirmed each fix.
   `ProgrammableSwitchEvent` characteristic (one per Remote face).
 - Hybrid GATT-indication + polling listener, working around the
   accessory's aggressive idle-disconnect behavior.
-- `calibrate.py`: interactive face-by-face verification tool.
-- `bridge.py`: long-running service publishing rotation events to MQTT,
+- `tools/calibrate.py`: interactive face-by-face verification tool.
+- `tools/bridge.py`: long-running service publishing rotation events to MQTT,
   with Home Assistant MQTT-discovery support and automatic BLE
   reconnection.
 
