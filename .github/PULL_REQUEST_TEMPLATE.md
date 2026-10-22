@@ -4,6 +4,8 @@
 
 ## How was this tested?
 
+- [ ] Changeset added if this changes `custom_components/` or `hapble/`
+      (`python scripts/changeset.py new --bump patch|minor|major -m "..."`)
 - [ ] `poetry run ruff check .` and `poetry run ruff format --check .` pass
 - [ ] `poetry run pytest` still passes (it runs in CI automatically, but is
       quick to check locally too), and `python scripts/sync_vendored.py

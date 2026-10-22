@@ -93,11 +93,33 @@ please open an issue with:
 Please see `SECURITY.md` before reporting anything sensitive (e.g. a flaw
 that would let someone impersonate a paired controller).
 
-## Releasing
+## Changesets and releasing
 
-1. Bump the version in `custom_components/nanoleaf_remote/manifest.json` and
-   `pyproject.toml` (`python scripts/check_versions.py` must pass) and move
-   the `CHANGELOG.md` entry out of "Unreleased".
-2. Merge to `main`, then push a tag from `main`: `git tag v0.1.0 && git push
-   origin v0.1.0`. The release workflow checks the tag against the version
-   and publishes the GitHub release that HACS uses for updates.
+The version is chosen by hand, change by change, with *changesets* (same idea
+as `@changesets/cli`, in plain Python: `scripts/changeset.py`).
+
+**In every pull request** that changes what users get (`custom_components/` or
+`hapble/`), add a changeset saying how big the change is and what the
+changelog should say:
+
+```sh
+python scripts/changeset.py new --bump patch|minor|major -m "What changed, for users"
+```
+
+`patch` is a fix, `minor` a backwards-compatible feature, `major` a breaking
+change. Commit the generated `.changeset/*.md` file with the PR. The
+`Changeset` check fails if it is missing; add the `no-changeset` label for an
+internal change that should not be in the changelog. Docs, tests, CI and
+`tools/` need none.
+
+**To release** (when you decide, not on every merge):
+
+1. `python scripts/changeset.py status` shows what would ship and the next
+   version.
+2. On a branch, run `python scripts/changeset.py version`: it applies the
+   highest pending bump to `manifest.json` and `pyproject.toml`, writes the
+   `CHANGELOG.md` section and deletes the consumed changesets. Open a PR
+   ("Release vX.Y.Z") and merge it.
+3. That's it: on the push to `main`, the `Release` workflow sees a version
+   without a GitHub release and publishes `vX.Y.Z` (notes = its changelog
+   section). HACS uses that release for updates. No manual tag.

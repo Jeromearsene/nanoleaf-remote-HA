@@ -48,6 +48,8 @@ jobs:
         run: python scripts/sync_vendored.py --check
       - name: Versions are consistent
         run: python scripts/check_versions.py
+      - name: Changeset files are valid
+        run: python scripts/changeset.py check
 
   ha-tests:
     name: Home Assistant integration tests
