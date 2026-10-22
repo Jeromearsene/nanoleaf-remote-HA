@@ -88,14 +88,32 @@
     "step": {
       "init": {
         "title": "Face numbering",
-        "description": "If the detected face does not match the face you turned to, run `poetry run calibrate` on a computer and paste the table it prints: 12 comma-separated numbers, the Nth being the real face for the Nth detected position. The default is 1,2,3,4,5,6,7,8,9,10,11,12.",
+        "description": "Faces are reported in the Remote's own order. Calibrate to tell Home Assistant which face you call 1, 2, 3 and so on.",
+        "menu_options": {
+          "calibrate": "Calibrate with the Remote",
+          "manual": "Paste a table"
+        }
+      },
+      "manual": {
+        "title": "Face table",
+        "description": "12 comma-separated numbers, the Nth being the real face for the Nth detected position (for example the table printed by `poetry run calibrate`). Default: 1,2,3,4,5,6,7,8,9,10,11,12.",
         "data": {
           "face_map": "Face table"
         }
+      },
+      "calibrate_face": {
+        "title": "Calibration: face {face} of {total}",
+        "description": "Turn the Remote so that the face you want to call **{face}** is on top, wait a second, then press Submit. Start with the face you want as 1 and follow the same order for the others. Automations are paused during calibration."
       }
     },
     "error": {
-      "invalid_face_map": "The table must contain each number from 1 to 12 exactly once, separated by commas."
+      "invalid_face_map": "The table must contain each number from 1 to 12 exactly once, separated by commas.",
+      "no_rotation": "No rotation detected since this step was shown. Turn the Remote onto the face, wait a second, then press Submit.",
+      "position_reused": "This face was already used for another number. Turn the Remote onto a different face."
+    },
+    "abort": {
+      "not_connected": "The Remote is not connected. Wake it by turning it, wait for the device to become available, then try again.",
+      "calibration_failed": "The calibration is inconsistent (two faces gave the same position). Start again."
     }
   }
 }

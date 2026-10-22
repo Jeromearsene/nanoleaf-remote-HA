@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import base64
 import logging
+import time
 from contextlib import suppress
 from typing import TypeAlias
 
@@ -54,6 +55,11 @@ class NanoleafRuntime:
         self.entry = entry
         self.address: str = entry.data[CONF_ADDRESS]
         self.connected = False
+        # Last raw position detected: (0-based index, time.monotonic()).
+        self.last_position: tuple[int, float] | None = None
+        # Rotation events are not forwarded to automations until then
+        # (set while the options dialog runs a calibration).
+        self.suppress_events_until = 0.0
         self._face_map = facemap.parse_face_map(entry.options.get(CONF_FACE_MAP))
         self._pairing = decode_pairing(entry.data[CONF_PAIRING])
         self._device_id = normalize_device_id(self._pairing.accessory_pairing_id)
@@ -165,6 +171,10 @@ class NanoleafRuntime:
                     value = await char.read_value()
                     # An armed instance reads 0x00; the others read "null".
                     if value and value != b"null":
+                        now = time.monotonic()
+                        self.last_position = (index, now)
+                        if now < self.suppress_events_until:
+                            continue
                         face = facemap.face_for_index(self._face_map, index)
                         async_dispatcher_send(
                             self.hass,

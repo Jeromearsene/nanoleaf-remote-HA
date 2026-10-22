@@ -7,6 +7,7 @@ import base64
 import binascii
 import json
 import logging
+import time
 import uuid
 from typing import Any
 
@@ -29,6 +30,7 @@ from homeassistant.helpers.selector import (
     TextSelectorConfig,
 )
 
+from .calibration import CalibrationSession
 from .const import (
     CONF_ADDRESS,
     CONF_FACE_MAP,
@@ -356,11 +358,23 @@ class NanoleafRemoteConfigFlow(ConfigFlow, domain=DOMAIN):
 
 
 class NanoleafOptionsFlow(OptionsFlow):
-    """Let the user correct the face numbering (from `poetry run calibrate`)."""
+    """Correct the face numbering: by hand or with a guided calibration."""
+
+    def __init__(self) -> None:
+        self._session: CalibrationSession | None = None
+        self._shown_at = 0.0
 
     async def async_step_init(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
+        return self.async_show_menu(
+            step_id="init", menu_options=["calibrate", "manual"]
+        )
+
+    async def async_step_manual(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Paste a table (for example one printed by `poetry run calibrate`)."""
         errors: dict[str, str] = {}
         if user_input is not None:
             try:
@@ -375,7 +389,56 @@ class NanoleafOptionsFlow(OptionsFlow):
             CONF_FACE_MAP, facemap.format_face_map(facemap.IDENTITY)
         )
         return self.async_show_form(
-            step_id="init",
+            step_id="manual",
             data_schema=vol.Schema({vol.Required(CONF_FACE_MAP, default=current): str}),
+            errors=errors,
+        )
+
+    async def async_step_calibrate(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Start a calibration: the Remote must be connected."""
+        runtime = getattr(self.config_entry, "runtime_data", None)
+        if runtime is None or not runtime.connected:
+            return self.async_abort(reason="not_connected")
+        self._session = CalibrationSession()
+        return await self.async_step_calibrate_face()
+
+    async def async_step_calibrate_face(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """One face: the user turns the Remote onto it, then submits."""
+        assert self._session is not None
+        runtime = self.config_entry.runtime_data
+        errors: dict[str, str] = {}
+
+        if user_input is not None:
+            position = runtime.last_position
+            if position is None or position[1] < self._shown_at:
+                errors["base"] = "no_rotation"
+            else:
+                try:
+                    self._session.record(position[0])
+                except ValueError:
+                    errors["base"] = "position_reused"
+            if not errors and self._session.done:
+                runtime.suppress_events_until = 0.0
+                face_map, _notes = self._session.table()
+                if face_map is None:
+                    return self.async_abort(reason="calibration_failed")
+                return self.async_create_entry(
+                    data={CONF_FACE_MAP: facemap.format_face_map(face_map)}
+                )
+
+        self._shown_at = time.monotonic()
+        # Keep automations quiet while the user turns the Remote around.
+        runtime.suppress_events_until = self._shown_at + 300
+        return self.async_show_form(
+            step_id="calibrate_face",
+            data_schema=vol.Schema({}),
+            description_placeholders={
+                "face": str(self._session.face),
+                "total": str(self._session.face_count),
+            },
             errors=errors,
         )

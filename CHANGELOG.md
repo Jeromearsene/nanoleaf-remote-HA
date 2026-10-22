@@ -20,7 +20,8 @@ each phase, including the dead ends and what confirmed each fix.
   Not yet validated end to end on real hardware from Home Assistant.
 - hassfest and HACS validation workflow.
 - Configurable face numbering table (`FACE_MAP`, and the Configure dialog in
-  Home Assistant), computed by `poetry run calibrate` from the faces you test.
+  Home Assistant), computed by `poetry run calibrate` from the faces you test,
+  or by a guided calibration in the Configure dialog of the integration.
 - BLE transport and HAP-BLE PDU framing on top of `bleak`, including
   request/response fragmentation across multiple GATT reads.
 - Pair-Setup (SRP-6a + Ed25519), verified against the official HAP
