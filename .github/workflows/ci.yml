@@ -54,7 +54,7 @@ jobs:
         run: python scripts/sync_vendored.py --check
 
   # Ces trois commandes-ci ont besoin d'un vrai Bluetooth et d'une vraie
-  # Nanoleaf Remote — elles ne peuvent pas tourner en CI. Voir README.md
+  # Nanoleaf Remote — elles ne peuvent pas tourner en CI. Voir docs/hapble.md
   # (section "Project status") pour ce qui a été validé contre du vrai
   # matériel et comment le reproduire soi-même : phase1, phase2, phase3,
   # phase4, phase5, calibrate, bridge.

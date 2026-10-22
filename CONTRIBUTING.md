@@ -11,7 +11,8 @@ Issues and pull requests are welcome, in English or in French.
 
 ## Before you start
 
-- **Read `README.md`** (and its French counterpart `README.fr.md`) — the
+- **Read `README.md`** (and its French counterpart `README.fr.md`) for the
+  integration, and `docs/hapble.md` for the protocol write-up. Its
   "Project status" section documents exactly what has been verified against
   real hardware, what's only validated against simulated accessories, and
   what remains uncertain. Please don't assume a phase is solid just because
