@@ -88,14 +88,32 @@
     "step": {
       "init": {
         "title": "Numérotation des faces",
-        "description": "Si la face détectée ne correspond pas à celle sur laquelle vous avez tourné, lancez `poetry run calibrate` sur un ordinateur et collez la table affichée : 12 nombres séparés par des virgules, le Nᵉ étant la vraie face pour la Nᵉ position détectée. Par défaut : 1,2,3,4,5,6,7,8,9,10,11,12.",
+        "description": "Les faces sont signalées dans l'ordre propre à la télécommande. Calibrez pour indiquer à Home Assistant quelle face vous appelez 1, 2, 3, etc.",
+        "menu_options": {
+          "calibrate": "Calibrer avec la télécommande",
+          "manual": "Coller une table"
+        }
+      },
+      "manual": {
+        "title": "Table des faces",
+        "description": "12 nombres séparés par des virgules, le Nᵉ étant la vraie face pour la Nᵉ position détectée (par exemple la table affichée par `poetry run calibrate`). Par défaut : 1,2,3,4,5,6,7,8,9,10,11,12.",
         "data": {
           "face_map": "Table des faces"
         }
+      },
+      "calibrate_face": {
+        "title": "Calibration : face {face} sur {total}",
+        "description": "Tournez la télécommande pour que la face que vous voulez appeler **{face}** soit sur le dessus, attendez une seconde, puis validez. Commencez par la face que vous voulez comme 1 et suivez le même ordre pour les autres. Les automatisations sont suspendues pendant la calibration."
       }
     },
     "error": {
-      "invalid_face_map": "La table doit contenir chaque nombre de 1 à 12 exactement une fois, séparés par des virgules."
+      "invalid_face_map": "La table doit contenir chaque nombre de 1 à 12 exactement une fois, séparés par des virgules.",
+      "no_rotation": "Aucune rotation détectée depuis l'affichage de cette étape. Tournez la télécommande sur la face, attendez une seconde, puis validez.",
+      "position_reused": "Cette face a déjà été utilisée pour un autre numéro. Tournez la télécommande sur une autre face."
+    },
+    "abort": {
+      "not_connected": "La télécommande n'est pas connectée. Réveillez-la en la tournant, attendez que l'appareil soit disponible, puis réessayez.",
+      "calibration_failed": "La calibration est incohérente (deux faces ont donné la même position). Recommencez."
     }
   }
 }
