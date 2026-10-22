@@ -24,7 +24,7 @@ Create an automation with an **Event** trigger on the entity and match `event_ty
 
 ## Status and limitations
 
-- Not yet validated end to end from Home Assistant on real hardware. The protocol layer has been validated against a real Remote with the standalone tools.
+- Validated end to end on a real Remote from Home Assistant (pairing, events, face calibration), on one setup so far: please report what you see on yours.
 - The Remote disconnects after ~5 s of silence, so the integration polls every 1.5 s to stay connected. The entity is unavailable while the Remote is out of range.
 - The cryptographic code has had no independent security audit. See `SECURITY.md`.
 - `custom_components/nanoleaf_remote/hapble/` is a vendored copy of the root `hapble/` library. Do not edit it by hand: run `python scripts/sync_vendored.py`.
