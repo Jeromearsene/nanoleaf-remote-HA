@@ -1,5 +1,5 @@
 blank_issues_enabled: true
 contact_links:
   - name: Question / discussion
-    url: https://github.com/Jeromearsene/hapble/discussions
+    url: https://github.com/Jeromearsene/nanoleaf-remote-HA/discussions
     about: For "how do I..." questions or general discussion, rather than a specific bug or feature request.
