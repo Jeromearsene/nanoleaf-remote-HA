@@ -43,7 +43,7 @@
       }
     },
     "error": {
-      "device_not_found": "La télécommande n'est pas visible par le Bluetooth de Home Assistant. Réveillez-la en la tournant et vérifiez la portée de votre adaptateur ou proxy Bluetooth.",
+      "device_not_found": "La télécommande n'a pas été entendue par le Bluetooth de Home Assistant. Elle n'émet que lorsqu'elle est éveillée : tournez-la en continu juste après avoir validé (Home Assistant attend 30 s), près de l'adaptateur Bluetooth. Si ça échoue encore, consultez le moniteur d'annonces de l'intégration Bluetooth.",
       "cannot_connect": "Connexion impossible à la télécommande. Réessayez en la tournant doucement pour la garder éveillée.",
       "timeout": "L'appairage a pris trop de temps. Réessayez.",
       "invalid_setup_code": "Le code d'appairage doit contenir 8 chiffres.",
