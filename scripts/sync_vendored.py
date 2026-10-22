@@ -25,6 +25,7 @@ VENDORED_MODULES = (
     "__init__",
     "ble_session",
     "crypto_hap",
+    "facemap",
     "pair_verify",
     "pairing",
     "pdu",

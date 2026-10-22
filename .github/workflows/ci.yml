@@ -45,6 +45,8 @@ jobs:
         run: poetry run pairing-fake
       - name: Full Pair-Verify against a simulated accessory
         run: poetry run verify-fake
+      - name: Face numbering table
+        run: poetry run facemap-test
       - name: Byte-compile every module (catches syntax errors)
         run: |
           python -m py_compile hapble/*.py *.py scripts/*.py custom_components/nanoleaf_remote/*.py

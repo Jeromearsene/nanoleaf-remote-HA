@@ -14,7 +14,13 @@ import voluptuous as vol
 from bleak_retry_connector import BleakClientWithServiceCache, establish_connection
 from homeassistant.components import bluetooth
 from homeassistant.components.bluetooth import BluetoothServiceInfoBleak
-from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
+from homeassistant.config_entries import (
+    ConfigEntry,
+    ConfigFlow,
+    ConfigFlowResult,
+    OptionsFlow,
+)
+from homeassistant.core import callback
 from homeassistant.helpers.selector import (
     SelectOptionDict,
     SelectSelector,
@@ -25,6 +31,7 @@ from homeassistant.helpers.selector import (
 
 from .const import (
     CONF_ADDRESS,
+    CONF_FACE_MAP,
     CONF_PAIRING,
     CONF_PAIRING_JSON,
     CONF_SETUP_CODE,
@@ -39,7 +46,7 @@ from .discovery import (
     homekit_device_id,
     normalize_device_id,
 )
-from .hapble import pair_verify, pairing, uuids
+from .hapble import facemap, pair_verify, pairing, uuids
 from .hapble.srp import SrpAuthenticationError
 from .hapble.transport import HapBleAccessory
 
@@ -87,6 +94,12 @@ class NanoleafRemoteConfigFlow(ConfigFlow, domain=DOMAIN):
 
     def __init__(self) -> None:
         self._discovery: BluetoothServiceInfoBleak | None = None
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlow:
+        """Options: the face numbering table."""
+        return NanoleafOptionsFlow()
 
     # -- helpers ---------------------------------------------------------
 
@@ -338,5 +351,31 @@ class NanoleafRemoteConfigFlow(ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="import_pairing",
             data_schema=vol.Schema(schema),
+            errors=errors,
+        )
+
+
+class NanoleafOptionsFlow(OptionsFlow):
+    """Let the user correct the face numbering (from `poetry run calibrate`)."""
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            try:
+                parsed = facemap.parse_face_map(user_input.get(CONF_FACE_MAP))
+            except ValueError:
+                errors["base"] = "invalid_face_map"
+            else:
+                return self.async_create_entry(
+                    data={CONF_FACE_MAP: facemap.format_face_map(parsed)}
+                )
+        current = self.config_entry.options.get(
+            CONF_FACE_MAP, facemap.format_face_map(facemap.IDENTITY)
+        )
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema({vol.Required(CONF_FACE_MAP, default=current): str}),
             errors=errors,
         )

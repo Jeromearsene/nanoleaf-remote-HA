@@ -18,6 +18,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_send
 
 from .const import (
     CONF_ADDRESS,
+    CONF_FACE_MAP,
     CONF_PAIRING,
     PLATFORMS,
     POLL_INTERVAL,
@@ -28,7 +29,7 @@ from .const import (
     signal_state,
 )
 from .discovery import find_service_info, normalize_device_id
-from .hapble import pair_verify
+from .hapble import facemap, pair_verify
 from .hapble.ble_session import BleSecureSession
 from .hapble.pairing import PairingResult
 from .hapble.transport import HapBleAccessory
@@ -53,6 +54,7 @@ class NanoleafRuntime:
         self.entry = entry
         self.address: str = entry.data[CONF_ADDRESS]
         self.connected = False
+        self._face_map = facemap.parse_face_map(entry.options.get(CONF_FACE_MAP))
         self._pairing = decode_pairing(entry.data[CONF_PAIRING])
         self._device_id = normalize_device_id(self._pairing.accessory_pairing_id)
         self._task: asyncio.Task | None = None
@@ -163,7 +165,7 @@ class NanoleafRuntime:
                     value = await char.read_value()
                     # An armed instance reads 0x00; the others read "null".
                     if value and value != b"null":
-                        face = index + 1
+                        face = facemap.face_for_index(self._face_map, index)
                         async_dispatcher_send(
                             self.hass,
                             signal_event(self.entry.entry_id),
@@ -185,6 +187,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: NanoleafConfigEntry) -> 
         )
     entry.runtime_data = runtime
     entry.async_on_unload(runtime.async_stop)
+    entry.async_on_unload(entry.add_update_listener(_async_options_updated))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     runtime.start()
     return True
@@ -193,3 +196,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: NanoleafConfigEntry) -> 
 async def async_unload_entry(hass: HomeAssistant, entry: NanoleafConfigEntry) -> bool:
     """Unload a configured remote."""
     return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+
+
+async def _async_options_updated(
+    hass: HomeAssistant, entry: NanoleafConfigEntry
+) -> None:
+    """Reload the entry when its options (face map) change."""
+    await hass.config_entries.async_reload(entry.entry_id)

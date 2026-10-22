@@ -83,5 +83,19 @@
         }
       }
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Numérotation des faces",
+        "description": "Si la face détectée ne correspond pas à celle sur laquelle vous avez tourné, lancez `poetry run calibrate` sur un ordinateur et collez la table affichée : 12 nombres séparés par des virgules, le Nᵉ étant la vraie face pour la Nᵉ position détectée. Par défaut : 1,2,3,4,5,6,7,8,9,10,11,12.",
+        "data": {
+          "face_map": "Table des faces"
+        }
+      }
+    },
+    "error": {
+      "invalid_face_map": "La table doit contenir chaque nombre de 1 à 12 exactement une fois, séparés par des virgules."
+    }
   }
 }
