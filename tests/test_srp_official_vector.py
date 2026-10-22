@@ -71,12 +71,3 @@ def test_official_srp_vector() -> None:
         "Vecteur de test officiel HAP (spec R2, §5.5.2) : TOUS LES "
         "CHAMPS CORRESPONDENT (v, A, B, S, K)."
     )
-
-
-def cli() -> None:
-    """Point d'entrée synchrone, pour `poetry run` (voir pyproject.toml)."""
-    test_official_srp_vector()
-
-
-if __name__ == "__main__":
-    cli()

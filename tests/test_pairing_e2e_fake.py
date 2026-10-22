@@ -15,8 +15,6 @@ fenêtre de connexion très courte observée en Phase 1.
 import asyncio
 import sys
 
-sys.path.insert(0, ".")
-
 from hapble import crypto_hap, pairing, srp, tlv8, uuids  # noqa: E402
 
 
@@ -195,10 +193,5 @@ async def main():
     print("TOUS LES TESTS DE BOUT EN BOUT SONT PASSES.")
 
 
-def cli() -> None:
-    """Point d'entrée synchrone, pour `poetry run` (voir pyproject.toml)."""
+def test_pair_setup_end_to_end_against_fake_accessory() -> None:
     asyncio.run(main())
-
-
-if __name__ == "__main__":
-    cli()

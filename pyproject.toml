@@ -26,44 +26,32 @@ Repository = "https://github.com/Jeromearsene/nanoleaf-remote-HA"
 Issues = "https://github.com/Jeromearsene/nanoleaf-remote-HA/issues"
 
 [tool.poetry]
-# Layout "plat" : le package importable est ./hapble, et les scripts
-# test_phase*.py etc. sont des modules top-level du dépôt lui-même (pas
-# publiés séparément) — inclus via `include` pour que les points d'entrée
-# ci-dessous puissent les importer une fois le projet installé en mode
-# développement (`poetry install`).
+# Layout "plat" : le package importable est ./hapble (bibliothèque) ;
+# ./tools contient les outils en ligne de commande qui parlent à une vraie
+# Remote, exposés par les scripts ci-dessous. Les tests sont dans ./tests.
 packages = [
     { include = "hapble" },
-    { include = "test_phase1.py" },
-    { include = "test_phase2.py" },
-    { include = "test_phase3.py" },
-    { include = "test_phase4.py" },
-    { include = "test_phase5.py" },
-    { include = "test_pairing_e2e_fake.py" },
-    { include = "test_pair_verify_e2e_fake.py" },
-    { include = "test_srp_official_vector.py" },
-    { include = "test_facemap.py" },
-    { include = "bridge.py" },
-    { include = "calibrate.py" },
+    { include = "tools" },
 ]
 
 [tool.poetry.group.dev.dependencies]
 ruff = ">=0.6"
 pre-commit = ">=3.7"
+pytest = ">=8"
 
 [tool.poetry.scripts]
-# Sans matériel :
-srp-vector    = "test_srp_official_vector:cli"
-pairing-fake  = "test_pairing_e2e_fake:cli"
-verify-fake   = "test_pair_verify_e2e_fake:cli"
-facemap-test  = "test_facemap:cli"
-# Contre le vrai appareil, dans l'ordre :
-phase1        = "test_phase1:cli"
-phase2        = "test_phase2:cli"
-phase3        = "test_phase3:cli"
-phase4        = "test_phase4:cli"
-phase5        = "test_phase5:cli"
-bridge        = "bridge:cli"
-calibrate     = "calibrate:cli"
+# Contre le vrai appareil, dans l'ordre (voir docs/hapble.md) :
+phase1        = "tools.phase1:cli"
+phase2        = "tools.phase2:cli"
+phase3        = "tools.phase3:cli"
+phase4        = "tools.phase4:cli"
+phase5        = "tools.phase5:cli"
+calibrate     = "tools.calibrate:cli"
+bridge        = "tools.bridge:cli"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
 
 [tool.ruff]
 line-length = 88
@@ -85,11 +73,12 @@ ignore = [
 # Les scripts de test/demo font un usage volontaire de `from module import
 # main` en bas de fichier et de variables non utilisées pour la lisibilité
 # des logs de debug — pas la peine d'être strict dessus.
-"test_*.py" = ["F401", "F841"]
+"tools/*.py" = ["F401", "F841"]
+"tests/*.py" = ["F401", "F841"]
 # I, P, A, B, S, K, x, u, v suivent la notation du vecteur de test officiel
 # SRP (spec HAP §5.5.2) — les renommer casserait la correspondance directe
 # avec le texte de la spec que ce fichier vérifie.
-"test_srp_official_vector.py" = ["E741"]
+"tests/test_srp_official_vector.py" = ["E741"]
 
 [build-system]
 requires = ["poetry-core>=2.0"]

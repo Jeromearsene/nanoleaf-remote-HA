@@ -1,5 +1,5 @@
 """
-bridge.py — service tournant en continu qui publie les événements de
+tools/bridge.py — service tournant en continu qui publie les événements de
 rotation de la Nanoleaf Remote vers MQTT, au format découverte
 automatique de Home Assistant (intégration MQTT "event").
 
@@ -31,7 +31,7 @@ from dotenv import load_dotenv
 from hapble import facemap, mqtt_bridge, pair_verify, pairing_store
 from hapble.ble_session import BleSecureSession
 from hapble.transport import HapBleAccessory
-from test_phase1 import discover_remote  # noqa: E402
+from tools.phase1 import discover_remote  # noqa: E402
 
 load_dotenv()  # no-op if there's no .env file — env vars still take priority
 

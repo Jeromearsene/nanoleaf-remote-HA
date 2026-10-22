@@ -48,15 +48,20 @@ poetry run pre-commit install
 ```bash
 poetry run ruff check .        # lint
 poetry run ruff format --check .   # formatting
-poetry run srp-vector          # SRP implementation vs. Apple's official test vector
-poetry run pairing-fake        # full Pair-Setup against a simulated accessory
-poetry run verify-fake         # full Pair-Verify against a simulated accessory
+poetry run pytest                              # protocol tests, no hardware needed
+python scripts/sync_vendored.py --check        # vendored hapble == hapble/
 ```
 
-These three `poetry run` commands are exactly what CI runs on every push
-and pull request — they need no real Bluetooth hardware. The `phaseN`,
-`calibrate`, and `bridge` commands do need a real Nanoleaf Remote and
-can't be exercised in CI; if you have one and are touching code they
+The Home Assistant integration tests (`tests/ha`) need Home Assistant
+installed (Python 3.13): `pip install homeassistant bleak-retry-connector`
+plus its Bluetooth dependencies, as in `.github/workflows/ci.yml`, then
+`python -m pytest tests/ha`. They are skipped when Home Assistant is absent.
+
+Everything above runs in CI on every push and pull request. If you change
+`hapble/`, run `python scripts/sync_vendored.py` to refresh the copy
+shipped inside the integration (HACS only installs that folder). The
+`phaseN`, `calibrate`, and `bridge` commands (in `tools/`) do need a real
+Nanoleaf Remote and can't be exercised in CI; if you have one and are touching code they
 depend on, please mention in your PR description what you tested against
 real hardware.
 

@@ -18,7 +18,7 @@ ce cas : souscrire (écrire le descripteur CCCD 0x2902) et écouter les
 notifications pendant qu'on tourne la Remote — pas encore implémenté ici.
 
 Usage :
-    python test_phase4.py
+    python -m tools.phase4
 """
 
 import asyncio
@@ -28,7 +28,7 @@ import sys
 from hapble import pair_verify, pairing_store
 from hapble.ble_session import BleSecureSession
 from hapble.transport import HapBleAccessory, HapBleError
-from test_phase1 import discover_remote  # noqa: E402
+from tools.phase1 import discover_remote  # noqa: E402
 
 LOG_LEVEL = logging.INFO
 
@@ -47,7 +47,7 @@ async def main() -> int:
 
     if not pairing_store.exists():
         print(f"!!! Aucun appairage trouvé ({pairing_store.DEFAULT_PATH}).")
-        print("    Lance d'abord test_phase2.py.")
+        print("    Lance d'abord tools/phase2.py.")
         return 1
 
     pairing = pairing_store.load()

@@ -1,6 +1,6 @@
 """
 Phase 3 — Pair-Verify contre la Nanoleaf Remote, en utilisant l'appairage
-déjà établi (pairing.json, produit par test_phase2.py).
+déjà établi (pairing.json, produit par tools/phase2.py).
 
 Ne redemande PAS le code à 8 chiffres : c'est justement l'intérêt de
 Pair-Verify. Si pairing.json n'existe pas ou est invalide, ce script
@@ -13,7 +13,7 @@ qui suivent M4 n'a pas encore été vérifié aussi précisément que le reste d
 ce projet.
 
 Usage :
-    python test_phase3.py
+    python -m tools.phase3
 """
 
 import asyncio
@@ -22,7 +22,7 @@ import sys
 
 from hapble import pair_verify, pairing_store
 from hapble.transport import HapBleAccessory, HapBleError
-from test_phase1 import discover_remote  # noqa: E402
+from tools.phase1 import discover_remote  # noqa: E402
 
 LOG_LEVEL = logging.INFO
 
@@ -41,7 +41,7 @@ async def main() -> int:
 
     if not pairing_store.exists():
         print(f"!!! Aucun appairage trouvé ({pairing_store.DEFAULT_PATH}).")
-        print("    Lance d'abord test_phase2.py pour appairer la Remote.")
+        print("    Lance d'abord tools/phase2.py pour appairer la Remote.")
         return 1
 
     pairing = pairing_store.load()
