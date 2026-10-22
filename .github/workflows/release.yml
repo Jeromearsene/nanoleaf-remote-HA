@@ -1,11 +1,14 @@
 name: Release
 
-# Push a tag such as v0.1.0 (after merging to main): the workflow checks the
-# tag matches the integration's version, then publishes the GitHub release
-# that HACS uses for updates.
+# Runs on every push to main. When the version in manifest.json has no GitHub
+# release yet (i.e. a "version" pull request, made with
+# `python scripts/changeset.py version`, was just merged), it publishes
+# `v<version>` with that version's CHANGELOG section as the notes. HACS uses
+# the release for updates. Nothing happens otherwise.
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -15,12 +18,20 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v6
-      - name: Tag matches manifest.json and pyproject.toml
-        run: python3 scripts/check_versions.py "${GITHUB_REF_NAME}"
-      - name: Create the GitHub release
+      - name: Versions are consistent
+        run: python3 scripts/check_versions.py
+      - name: Publish the release if this version has none yet
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          version=$(python3 -c 'import json; print(json.load(open("custom_components/nanoleaf_remote/manifest.json"))["version"])')
+          tag="v${version}"
+          if gh release view "${tag}" >/dev/null 2>&1; then
+            echo "${tag} is already released: nothing to do."
+            exit 0
+          fi
+          python3 scripts/changeset.py notes "${version}" > "${RUNNER_TEMP}/notes.md"
           prerelease=""
-          case "${GITHUB_REF_NAME}" in *-*) prerelease="--prerelease" ;; esac
-          gh release create "${GITHUB_REF_NAME}" --verify-tag --generate-notes ${prerelease}
+          case "${version}" in *-*) prerelease="--prerelease" ;; esac
+          gh release create "${tag}" --target "${GITHUB_SHA}" --title "${tag}" \
+            --notes-file "${RUNNER_TEMP}/notes.md" ${prerelease}
