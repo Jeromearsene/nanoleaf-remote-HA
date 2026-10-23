@@ -299,6 +299,7 @@ faire tourner la Remote juste avant/pendant l'exécution.
 | `poetry run phase5 [durée]` | Oui                  | Abonnement aux indications (écoute en direct) |
 | `poetry run calibrate` | Oui                        | Vérification interactive face par face |
 | `poetry run bridge`     | Oui                      | Service continu : publie les événements vers MQTT/Home Assistant |
+| `poetry run watch_adv`  | Oui (écoute seule)       | Observe les annonces de la Remote (sans connexion) pour voir si son compteur d'état change quand on la tourne |
 
 ## Lancer le test Phase 5 (indications, écoute en direct)
 
