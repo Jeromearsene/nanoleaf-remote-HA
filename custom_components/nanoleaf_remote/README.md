@@ -25,6 +25,6 @@ Create an automation with an **Event** trigger on the entity and match `event_ty
 ## Status and limitations
 
 - Validated end to end on a real Remote from Home Assistant (pairing, events, face calibration), on one setup so far: please report what you see on yours.
-- The Remote disconnects after ~5 s of silence, so the integration polls every 1.5 s to stay connected. The entity is unavailable while the Remote is out of range.
+- By default the Remote disconnects after ~5 s of silence, so the integration polls every 1.5 s to stay connected, and the entity is unavailable while the Remote is out of range. The experimental **Battery saving mode** (Configure) avoids the permanent connection: it connects only when the Remote's advertised state counter changes. Not measured on batteries yet.
 - The cryptographic code has had no independent security audit. See `SECURITY.md`.
 - `custom_components/nanoleaf_remote/hapble/` is a vendored copy of the root `hapble/` library. Do not edit it by hand: run `python scripts/sync_vendored.py`.

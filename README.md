@@ -63,6 +63,10 @@ The Remote reports its faces in its own internal order, which may not match the 
 - **Calibrate with the Remote**: for each face, turn the Remote onto it, wait a second, press Submit. Start with the face you want to call 1 and follow the same order for the others. Automations are paused meanwhile.
 - **Paste a table**: 12 comma-separated numbers, the Nth being the real face for the Nth detected position (the table printed by `poetry run calibrate`).
 
+### Battery saving mode (experimental)
+
+By default Home Assistant stays connected to the Remote and reads it every 1.5 s. In **Configure → Battery saving mode (experimental)** it can instead listen to the Remote's Bluetooth advertisements and connect only when it is turned (like Apple Home does), then let go after 10 s without activity. Expect 2–3 s of latency, and it needs a Bluetooth adapter that hears the Remote when it is awake. It should be lighter on the batteries, but this has not been measured yet: please report what you see. Turn it off to go back to the permanent connection.
+
 ## Troubleshooting
 
 | Symptom | What to check |

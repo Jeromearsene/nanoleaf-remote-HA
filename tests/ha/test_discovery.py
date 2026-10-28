@@ -86,3 +86,18 @@ def test_gives_up_after_the_timeout() -> None:
             discovery.async_wait_for_service_info(None, None, DEVICE_ID, 1)
         )
     assert found is None
+
+
+def test_gsn_is_read_from_the_advertisement() -> None:
+    # ... category 0x000F, GSN 52 (0x0034), config number 115, compat version 2
+    full = SimpleNamespace(
+        address="FA:2E:63:20:7F:BE",
+        name=None,
+        manufacturer_data={
+            76: bytes([6, 0x31, 0, 0xD6, 0xBD, 0x09, 0xC0, 0x32, 0x1D])
+            + bytes([0x0F, 0x00, 0x34, 0x00, 115, 2])
+        },
+    )
+    assert discovery.homekit_gsn(full) == 52
+    assert discovery.homekit_gsn(REMOTE) is None  # too short to carry one
+    assert discovery.homekit_gsn(NOT_HOMEKIT) is None

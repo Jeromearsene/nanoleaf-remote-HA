@@ -32,6 +32,14 @@ def homekit_device_id(info: BluetoothServiceInfoBleak) -> str | None:
     return ":".join(f"{byte:02X}" for byte in data[3:9])
 
 
+def homekit_gsn(info: BluetoothServiceInfoBleak) -> int | None:
+    """Return the advertised Global State Number, if the advertisement has one."""
+    data = info.manufacturer_data.get(APPLE_COMPANY_ID)
+    if not data or len(data) < 15 or data[0] != HOMEKIT_ADV_TYPE:
+        return None
+    return int.from_bytes(data[11:13], "little")
+
+
 def normalize_device_id(raw: bytes | str | None) -> str | None:
     """Normalise a pairing identifier to "AA:BB:CC:DD:EE:FF", else None."""
     if raw is None:

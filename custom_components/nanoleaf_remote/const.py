@@ -8,12 +8,25 @@ CONF_SETUP_CODE = "setup_code"
 CONF_PAIRING = "pairing"
 CONF_PAIRING_JSON = "pairing_json"
 CONF_FACE_MAP = "face_map"
+CONF_POWER_SAVING = "power_saving"
 
 EVENT_TYPES = [f"face_{i}" for i in range(1, 13)]
 
 # The Remote drops an idle connection after ~5 s, so reading the switch
 # characteristics every 1.5 s doubles as a keep-alive.
 POLL_INTERVAL = 1.5
+
+# Battery saving mode: no standing connection. The Remote is only contacted
+# when its advertised state counter changes, and released once it has been
+# idle for ACTIVE_WINDOW seconds (which also re-arms the counter).
+ACTIVE_WINDOW = 10.0
+# After a session, advertisements only refresh the reference counter for this
+# long (a session can move the counter by itself).
+BASELINE_WINDOW = 6.0
+# Never start two sessions closer than this (protects against a loop).
+MIN_SESSION_GAP = 3.0
+# Failed attempts after a wake-up before waiting for the next one.
+POWER_SAVING_ATTEMPTS = 3
 
 # Reconnection backoff, in seconds.
 RECONNECT_MIN_DELAY = 3.0

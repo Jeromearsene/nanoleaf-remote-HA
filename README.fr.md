@@ -63,6 +63,10 @@ La télécommande signale ses faces dans son ordre interne, qui peut ne pas corr
 - **Calibrer avec la télécommande** : pour chaque face, tournez la télécommande dessus, attendez une seconde, validez. Commencez par la face que vous voulez appeler 1 et suivez le même ordre pour les autres. Les automatisations sont suspendues pendant ce temps.
 - **Coller une table** : 12 nombres séparés par des virgules, le Nᵉ étant la vraie face pour la Nᵉ position détectée (la table affichée par `poetry run calibrate`).
 
+### Mode économie de piles (expérimental)
+
+Par défaut, Home Assistant reste connecté à la télécommande et la lit toutes les 1,5 s. Dans **Configurer → Mode économie de piles (expérimental)**, il peut à la place écouter ses annonces Bluetooth et ne se connecter que lorsqu'on la tourne (comme Apple Maison), puis la relâcher après 10 s sans activité. Comptez 2 à 3 s de latence ; il faut un adaptateur Bluetooth qui entend la télécommande quand elle est réveillée. Cela devrait ménager les piles, mais ce n'est pas encore mesuré : dites-nous ce que vous observez. Désactivez-le pour revenir à la connexion permanente.
+
 ## Dépannage
 
 | Symptôme | À vérifier |
