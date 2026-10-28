@@ -15,12 +15,13 @@ from custom_components.nanoleaf_remote import config_flow  # noqa: E402
 
 class FakeRuntime:
     connected = True
+    power_saving = False
     last_position = None
     suppress_events_until = 0.0
 
 
-def _flow(runtime):
-    entry = SimpleNamespace(options={}, runtime_data=runtime)
+def _flow(runtime, options=None):
+    entry = SimpleNamespace(options=options or {}, runtime_data=runtime)
     flow = config_flow.NanoleafOptionsFlow()
     flow.flow_id = "test"
     flow.handler = "nanoleaf_remote"
@@ -31,7 +32,7 @@ def _flow(runtime):
 def test_menu_offers_calibration_and_manual_table() -> None:
     result = asyncio.run(_flow(FakeRuntime()).async_step_init())
     assert result["type"] == "menu"
-    assert result["menu_options"] == ["calibrate", "manual"]
+    assert result["menu_options"] == ["calibrate", "manual", "power_saving"]
 
 
 def test_calibration_saves_the_table() -> None:
@@ -84,3 +85,31 @@ def test_calibration_needs_a_connected_remote() -> None:
 def test_invalid_pasted_table_is_rejected() -> None:
     result = asyncio.run(_flow(FakeRuntime()).async_step_manual({"face_map": "1,2,3"}))
     assert result["errors"] == {"base": "invalid_face_map"}
+
+
+def test_calibration_works_without_a_connection_in_battery_saving_mode() -> None:
+    runtime = FakeRuntime()
+    runtime.connected = False
+    runtime.power_saving = True
+    result = asyncio.run(_flow(runtime).async_step_calibrate())
+    assert result["type"] == "form"
+    assert result["step_id"] == "calibrate_face"
+
+
+def test_battery_saving_option_is_saved_and_keeps_the_face_table() -> None:
+    flow = _flow(FakeRuntime(), options={"face_map": "2,1,3,4,5,6,7,8,9,10,11,12"})
+    form = asyncio.run(flow.async_step_power_saving())
+    assert form["type"] == "form"
+    result = asyncio.run(flow.async_step_power_saving({"power_saving": True}))
+    assert result["data"] == {
+        "face_map": "2,1,3,4,5,6,7,8,9,10,11,12",
+        "power_saving": True,
+    }
+
+
+def test_saving_a_face_table_keeps_the_battery_saving_option() -> None:
+    flow = _flow(FakeRuntime(), options={"power_saving": True})
+    result = asyncio.run(
+        flow.async_step_manual({"face_map": "2,1,3,4,5,6,7,8,9,10,11,12"})
+    )
+    assert result["data"]["power_saving"] is True

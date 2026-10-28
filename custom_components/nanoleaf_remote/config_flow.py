@@ -36,6 +36,7 @@ from .const import (
     CONF_FACE_MAP,
     CONF_PAIRING,
     CONF_PAIRING_JSON,
+    CONF_POWER_SAVING,
     CONF_SETUP_CODE,
     DOMAIN,
     LOCAL_NAME_PREFIX,
@@ -358,7 +359,7 @@ class NanoleafRemoteConfigFlow(ConfigFlow, domain=DOMAIN):
 
 
 class NanoleafOptionsFlow(OptionsFlow):
-    """Correct the face numbering: by hand or with a guided calibration."""
+    """Face numbering (by hand or calibrated) and the battery saving mode."""
 
     def __init__(self) -> None:
         self._session: CalibrationSession | None = None
@@ -368,7 +369,26 @@ class NanoleafOptionsFlow(OptionsFlow):
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         return self.async_show_menu(
-            step_id="init", menu_options=["calibrate", "manual"]
+            step_id="init", menu_options=["calibrate", "manual", "power_saving"]
+        )
+
+    async def async_step_power_saving(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Choose between the permanent connection and the battery saving mode."""
+        if user_input is not None:
+            return self.async_create_entry(
+                data={
+                    **self.config_entry.options,
+                    CONF_POWER_SAVING: user_input[CONF_POWER_SAVING],
+                }
+            )
+        current = self.config_entry.options.get(CONF_POWER_SAVING, False)
+        return self.async_show_form(
+            step_id="power_saving",
+            data_schema=vol.Schema(
+                {vol.Required(CONF_POWER_SAVING, default=current): bool}
+            ),
         )
 
     async def async_step_manual(
@@ -383,7 +403,10 @@ class NanoleafOptionsFlow(OptionsFlow):
                 errors["base"] = "invalid_face_map"
             else:
                 return self.async_create_entry(
-                    data={CONF_FACE_MAP: facemap.format_face_map(parsed)}
+                    data={
+                        **self.config_entry.options,
+                        CONF_FACE_MAP: facemap.format_face_map(parsed),
+                    }
                 )
         current = self.config_entry.options.get(
             CONF_FACE_MAP, facemap.format_face_map(facemap.IDENTITY)
@@ -399,7 +422,9 @@ class NanoleafOptionsFlow(OptionsFlow):
     ) -> ConfigFlowResult:
         """Start a calibration: the Remote must be connected."""
         runtime = getattr(self.config_entry, "runtime_data", None)
-        if runtime is None or not runtime.connected:
+        # In battery saving mode the Remote connects when it is turned, so a
+        # calibration needs no connection beforehand.
+        if runtime is None or not (runtime.connected or runtime.power_saving):
             return self.async_abort(reason="not_connected")
         self._session = CalibrationSession()
         return await self.async_step_calibrate_face()
@@ -427,7 +452,10 @@ class NanoleafOptionsFlow(OptionsFlow):
                 if face_map is None:
                     return self.async_abort(reason="calibration_failed")
                 return self.async_create_entry(
-                    data={CONF_FACE_MAP: facemap.format_face_map(face_map)}
+                    data={
+                        **self.config_entry.options,
+                        CONF_FACE_MAP: facemap.format_face_map(face_map),
+                    }
                 )
 
         self._shown_at = time.monotonic()

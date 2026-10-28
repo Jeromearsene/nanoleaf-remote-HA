@@ -87,11 +87,12 @@
   "options": {
     "step": {
       "init": {
-        "title": "Numérotation des faces",
-        "description": "Les faces sont signalées dans l'ordre propre à la télécommande. Calibrez pour indiquer à Home Assistant quelle face vous appelez 1, 2, 3, etc.",
+        "title": "Options",
+        "description": "Numérotation des faces : calibre pour indiquer à Home Assistant quelle face tu appelles 1, 2, 3, etc. Économie de piles : ne se connecter à la Remote que lorsqu'on la tourne.",
         "menu_options": {
           "calibrate": "Calibrer avec la télécommande",
-          "manual": "Coller une table"
+          "manual": "Coller une table",
+          "power_saving": "Mode économie de piles (expérimental)"
         }
       },
       "manual": {
@@ -104,6 +105,13 @@
       "calibrate_face": {
         "title": "Calibration : face {face} sur {total}",
         "description": "Tournez la télécommande pour que la face que vous voulez appeler **{face}** soit sur le dessus, attendez une seconde, puis validez. Commencez par la face que vous voulez comme 1 et suivez le même ordre pour les autres. Les automatisations sont suspendues pendant la calibration."
+      },
+      "power_saving": {
+        "title": "Mode économie de piles",
+        "description": "Désactivé (par défaut) : Home Assistant reste connecté et lit la Remote toutes les 1,5 s. Activé : Home Assistant écoute les annonces Bluetooth de la Remote et ne se connecte que lorsqu'on la tourne, puis la relâche après 10 s d'inactivité. Devrait ménager les piles (pas encore mesuré) ; la réaction peut prendre 2 à 3 secondes. Nécessite un adaptateur Bluetooth qui entend la Remote quand elle est réveillée.",
+        "data": {
+          "power_saving": "Mode économie de piles"
+        }
       }
     },
     "error": {

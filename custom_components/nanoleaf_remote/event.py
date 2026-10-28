@@ -49,8 +49,8 @@ class NanoleafRemoteEvent(EventEntity):
 
     @property
     def available(self) -> bool:
-        """The entity is available while the Remote is connected."""
-        return self._runtime.connected
+        """Connected, or (battery saving mode) not known to be unreachable."""
+        return self._runtime.available
 
     async def async_added_to_hass(self) -> None:
         """Subscribe to this remote's events and connection state."""

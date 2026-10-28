@@ -12,24 +12,38 @@ from typing import TypeAlias
 from bleak import BleakClient
 from bleak_retry_connector import BleakClientWithServiceCache, establish_connection
 from homeassistant.components import bluetooth
+from homeassistant.components.bluetooth import BluetoothScanningMode
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.dispatcher import async_dispatcher_send
 
 from .const import (
+    ACTIVE_WINDOW,
+    BASELINE_WINDOW,
     CONF_ADDRESS,
     CONF_FACE_MAP,
     CONF_PAIRING,
+    CONF_POWER_SAVING,
+    MIN_SESSION_GAP,
     PLATFORMS,
     POLL_INTERVAL,
+    POWER_SAVING_ATTEMPTS,
     RECONNECT_MAX_DELAY,
     RECONNECT_MIN_DELAY,
     VERIFY_TIMEOUT,
     signal_event,
     signal_state,
 )
-from .discovery import find_service_info, normalize_device_id
+from .discovery import (
+    APPLE_COMPANY_ID,
+    HOMEKIT_ADV_TYPE,
+    find_service_info,
+    homekit_device_id,
+    homekit_gsn,
+    normalize_device_id,
+)
+from .gsn import GsnWatcher
 from .hapble import facemap, pair_verify
 from .hapble.ble_session import BleSecureSession
 from .hapble.pairing import PairingResult
@@ -47,14 +61,26 @@ def decode_pairing(data: dict[str, str]) -> PairingResult:
     )
 
 
+class RemoteNotSeen(RuntimeError):
+    """No Bluetooth adapter currently hears the Remote (it is probably asleep)."""
+
+
 class NanoleafRuntime:
-    """Keep one Remote connected and turn its switch reads into HA events."""
+    """Turn one Remote's switch reads into HA events.
+
+    Default: stay connected and read every POLL_INTERVAL seconds. Battery
+    saving mode: stay disconnected, watch the advertised state counter, and
+    connect only when it changes (see gsn.py).
+    """
 
     def __init__(self, hass: HomeAssistant, entry: NanoleafConfigEntry) -> None:
         self.hass = hass
         self.entry = entry
         self.address: str = entry.data[CONF_ADDRESS]
         self.connected = False
+        self.power_saving: bool = bool(entry.options.get(CONF_POWER_SAVING, False))
+        # Battery saving mode: false once the Remote could not be reached.
+        self._reachable = True
         # Last raw position detected: (0-based index, time.monotonic()).
         self.last_position: tuple[int, float] | None = None
         # Rotation events are not forwarded to automations until then
@@ -65,26 +91,69 @@ class NanoleafRuntime:
         self._device_id = normalize_device_id(self._pairing.accessory_pairing_id)
         self._task: asyncio.Task | None = None
         self._stopping = False
+        self._watcher = GsnWatcher(BASELINE_WINDOW)
+        self._wake = asyncio.Event()
+        self._poke = asyncio.Event()
+        self._unsub_adv = None
 
     def start(self) -> None:
         """Start the background listener."""
+        if self.power_saving:
+            self._unsub_adv = bluetooth.async_register_callback(
+                self.hass,
+                self._on_advertisement,
+                {
+                    "manufacturer_id": APPLE_COMPANY_ID,
+                    "manufacturer_data_start": [HOMEKIT_ADV_TYPE],
+                    "connectable": True,
+                },
+                BluetoothScanningMode.ACTIVE,
+            )
+            # One session at startup: it also registers for the Remote's events.
+            self._wake.set()
         self._task = self.entry.async_create_background_task(
-            self.hass, self._run(), name=f"nanoleaf_remote_{self.address}"
+            self.hass,
+            self._run_power_saving() if self.power_saving else self._run(),
+            name=f"nanoleaf_remote_{self.address}",
         )
 
     async def async_stop(self) -> None:
         """Stop the listener and wait for the connection to be released."""
         self._stopping = True
+        if self._unsub_adv is not None:
+            self._unsub_adv()
+            self._unsub_adv = None
         if self._task:
             self._task.cancel()
             with suppress(asyncio.CancelledError):
                 await self._task
             self._task = None
 
+    @property
+    def available(self) -> bool:
+        """Connected, or (battery saving mode) not known to be unreachable."""
+        return self.connected or (self.power_saving and self._reachable)
+
     def _set_connected(self, connected: bool) -> None:
         if self.connected != connected:
             self.connected = connected
             async_dispatcher_send(self.hass, signal_state(self.entry.entry_id))
+
+    def _set_reachable(self, reachable: bool) -> None:
+        if self._reachable != reachable:
+            self._reachable = reachable
+            async_dispatcher_send(self.hass, signal_state(self.entry.entry_id))
+
+    def _on_advertisement(self, info, change) -> None:
+        """Battery saving mode: wake the listener when the state counter moves."""
+        if homekit_device_id(info) != self._device_id:
+            return
+        gsn = homekit_gsn(info)
+        if gsn is None or self.connected:
+            return
+        if self._watcher.observe(gsn, time.monotonic()):
+            _LOGGER.debug("Nanoleaf Remote state counter is now %d: connecting", gsn)
+            self._wake.set()
 
     def ble_device(self):
         """Current BLEDevice: by stored address, else by HomeKit device ID."""
@@ -137,11 +206,64 @@ class NanoleafRuntime:
                 self._set_connected(False)
             await asyncio.sleep(delay)
 
+    async def _run_power_saving(self) -> None:
+        """Wait for the state counter to move, then do one short session."""
+        last_start = 0.0
+        last_failure: str | None = None
+        while not self._stopping:
+            await self._wake.wait()
+            pause = last_start + MIN_SESSION_GAP - time.monotonic()
+            if pause > 0:
+                await asyncio.sleep(pause)
+            self._wake.clear()
+            last_start = time.monotonic()
+            delay = RECONNECT_MIN_DELAY
+            for attempt in range(1, POWER_SAVING_ATTEMPTS + 1):
+                try:
+                    await self._session()
+                    self._set_reachable(True)
+                    if last_failure is not None:
+                        _LOGGER.info("Nanoleaf Remote %s reachable again", self.address)
+                        last_failure = None
+                    break
+                except asyncio.CancelledError:
+                    raise
+                except RemoteNotSeen:
+                    # Asleep: normal in this mode, wait for it to advertise.
+                    _LOGGER.debug("Nanoleaf Remote %s is not in range", self.address)
+                    break
+                except Exception as err:  # noqa: BLE001 - keep the listener alive
+                    failure = f"{type(err).__name__}: {err}"
+                    if attempt == POWER_SAVING_ATTEMPTS:
+                        level = (
+                            logging.WARNING
+                            if failure != last_failure
+                            else logging.DEBUG
+                        )
+                        _LOGGER.log(
+                            level,
+                            "Nanoleaf Remote %s could not be reached (%s)",
+                            self.address,
+                            failure,
+                        )
+                        last_failure = failure
+                        self._set_reachable(False)
+                    else:
+                        await asyncio.sleep(delay)
+                        delay *= 2
+                finally:
+                    self._set_connected(False)
+            self._watcher.session_ended(time.monotonic())
+
+    def _on_indication(self, index: int, decoded, raw: bytes) -> None:
+        """The Remote indicated a rotation: read right away (see _session)."""
+        self._poke.set()
+
     async def _session(self) -> None:
         """One connection: verify the pairing, then poll until it drops."""
         device = self.ble_device()
         if device is None:
-            raise RuntimeError("not seen by any Home Assistant Bluetooth adapter")
+            raise RemoteNotSeen("not seen by any Home Assistant Bluetooth adapter")
 
         client: BleakClient = await establish_connection(
             BleakClientWithServiceCache,
@@ -166,12 +288,20 @@ class NanoleafRuntime:
                 len(chars),
             )
             self._set_connected(True)
+            if self.power_saving:
+                # Registers for the Remote's events (so that it moves its
+                # state counter while we are away) and wakes the loop below
+                # as soon as a rotation is indicated.
+                await accessory.subscribe_switch_events(chars, self._on_indication)
+            last_activity = time.monotonic()
             while not self._stopping and client.is_connected:
+                self._poke.clear()
                 for index, char in enumerate(chars):
                     value = await char.read_value()
                     # An armed instance reads 0x00; the others read "null".
                     if value and value != b"null":
                         now = time.monotonic()
+                        last_activity = now
                         self.last_position = (index, now)
                         if now < self.suppress_events_until:
                             continue
@@ -182,7 +312,14 @@ class NanoleafRuntime:
                             f"face_{face}",
                             {"face": face},
                         )
-                await asyncio.sleep(POLL_INTERVAL)
+                if self.power_saving:
+                    if time.monotonic() - last_activity > ACTIVE_WINDOW:
+                        return  # idle: release the Remote
+                    with suppress(TimeoutError):
+                        async with asyncio.timeout(POLL_INTERVAL):
+                            await self._poke.wait()
+                else:
+                    await asyncio.sleep(POLL_INTERVAL)
         finally:
             with suppress(Exception):
                 await client.disconnect()
@@ -191,7 +328,8 @@ class NanoleafRuntime:
 async def async_setup_entry(hass: HomeAssistant, entry: NanoleafConfigEntry) -> bool:
     """Set up a configured remote."""
     runtime = NanoleafRuntime(hass, entry)
-    if runtime.ble_device() is None:
+    # In battery saving mode the Remote is asleep (silent) most of the time.
+    if not runtime.power_saving and runtime.ble_device() is None:
         raise ConfigEntryNotReady(
             f"Nanoleaf Remote {runtime.address} is not visible to Home Assistant Bluetooth"
         )

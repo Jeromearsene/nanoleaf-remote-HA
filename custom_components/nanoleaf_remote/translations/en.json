@@ -87,11 +87,12 @@
   "options": {
     "step": {
       "init": {
-        "title": "Face numbering",
-        "description": "Faces are reported in the Remote's own order. Calibrate to tell Home Assistant which face you call 1, 2, 3 and so on.",
+        "title": "Options",
+        "description": "Face numbering: calibrate to tell Home Assistant which face you call 1, 2, 3 and so on. Battery saving: connect to the Remote only when it is turned.",
         "menu_options": {
           "calibrate": "Calibrate with the Remote",
-          "manual": "Paste a table"
+          "manual": "Paste a table",
+          "power_saving": "Battery saving mode (experimental)"
         }
       },
       "manual": {
@@ -104,6 +105,13 @@
       "calibrate_face": {
         "title": "Calibration: face {face} of {total}",
         "description": "Turn the Remote so that the face you want to call **{face}** is on top, wait a second, then press Submit. Start with the face you want as 1 and follow the same order for the others. Automations are paused during calibration."
+      },
+      "power_saving": {
+        "title": "Battery saving mode",
+        "description": "Off (default): Home Assistant stays connected and reads the Remote every 1.5 s. On: Home Assistant listens to the Remote's Bluetooth advertisements and connects only when it is turned, then lets go after 10 s of inactivity. Should be lighter on the Remote's batteries (not measured yet); the reaction can take 2 to 3 seconds. Needs a Bluetooth adapter that hears the Remote when it is awake.",
+        "data": {
+          "power_saving": "Battery saving mode"
+        }
       }
     },
     "error": {
