@@ -1,6 +1,6 @@
 [project]
 name = "hapble"
-version = "0.1.0"
+version = "0.2.0"
 description = "A from-scratch HAP-BLE (HomeKit Accessory Protocol over Bluetooth LE) client built on bleak, to control a Nanoleaf Remote from Home Assistant without depending on Apple Home."
 readme = "README.md"
 license = { file = "LICENSE" }
