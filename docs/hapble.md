@@ -348,6 +348,7 @@ trigger on this entity, filtered on the `event_type` attribute).
 | `poetry run phase5 [duration]` | Yes | Indication subscription (live listening) |
 | `poetry run calibrate` | Yes | Interactive face-by-face verification |
 | `poetry run bridge` | Yes | Long-running service: publishes events to MQTT/Home Assistant |
+| `poetry run watch_adv` | Yes (listen only) | Watches the Remote's advertisements (no connection) to see whether its state counter changes when turned |
 
 ## Sources used for the protocol constants
 
