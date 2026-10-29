@@ -216,13 +216,14 @@ def cmd_check(args: argparse.Namespace) -> int:
     base = git("merge-base", args.base, "HEAD").strip()
     changed = git("diff", "--name-only", f"{base}...HEAD").splitlines()
     touched = [p for p in changed if p.startswith(USER_FACING)]
+    # A changeset added by the PR, or consumed by it (a release PR runs
+    # `version`, which deletes them and bumps the version).
     added = [
         p
         for p in changed
         if p.startswith(".changeset/")
         and p.endswith(".md")
         and p != ".changeset/README.md"
-        and (ROOT / p).exists()
     ]
     if touched and not added:
         print(
