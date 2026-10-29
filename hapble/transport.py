@@ -417,7 +417,10 @@ class HapBleAccessory:
         )
 
     async def subscribe_switch_events(
-        self, characteristics: List[HapBleCharacteristic], on_event
+        self,
+        characteristics: List[HapBleCharacteristic],
+        on_event,
+        decode: bool = True,
     ) -> int:
         """S'abonne aux indications GATT (CCCD standard) sur chacune des
         caractéristiques fournies. `on_event(index, decoded_value_or_None,
@@ -436,7 +439,13 @@ class HapBleAccessory:
         automatiquement mais peut se tromper selon la plateforme/le
         firmware. Retourne le nombre d'abonnements confirmés comme
         "indicate" actif ; logge un avertissement clair pour chaque échec
-        au lieu de laisser un abonnement silencieusement inactif."""
+        au lieu de laisser un abonnement silencieusement inactif.
+
+        `decode=False` : ne tente PAS de déchiffrer les indications (donc
+        ne touche jamais aux compteurs de la session) ; `on_event` reçoit
+        `None` comme valeur décodée. À utiliser avec la Remote, qui renvoie
+        en indication une COPIE de chaque réponse lue : la décoder
+        consommerait le compteur de la vraie lecture."""
         assert self.client is not None, "Non connecté."
 
         CCCD_UUID = "00002902-0000-1000-8000-00805f9b34fb"
@@ -447,10 +456,10 @@ class HapBleAccessory:
             def make_callback(idx: int, c: HapBleCharacteristic):
                 def callback(_sender, data: bytearray) -> None:
                     raw = bytes(data)
-                    logger.info(
+                    logger.debug(
                         "Indication brute recue [instance %d] : %s", idx, raw.hex(" ")
                     )
-                    decoded = c.try_decode_indication(raw)
+                    decoded = c.try_decode_indication(raw) if decode else None
                     asyncio.create_task(_safe_call(on_event, idx, decoded, raw))
 
                 return callback
