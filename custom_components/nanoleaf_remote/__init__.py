@@ -93,7 +93,6 @@ class NanoleafRuntime:
         self._stopping = False
         self._watcher = GsnWatcher(BASELINE_WINDOW)
         self._wake = asyncio.Event()
-        self._poke = asyncio.Event()
         self._unsub_adv = None
 
     def start(self) -> None:
@@ -261,9 +260,9 @@ class NanoleafRuntime:
                     self._set_connected(False)
             self._watcher.session_ended(time.monotonic())
 
-    def _on_indication(self, index: int, decoded, raw: bytes) -> None:
-        """The Remote indicated a rotation: read right away (see _session)."""
-        self._poke.set()
+    @staticmethod
+    def _ignore_indication(index: int, decoded, raw: bytes) -> None:
+        """Indications are ignored: the Remote mirrors every response as one."""
 
     async def _session(self) -> None:
         """One connection: verify the pairing, then poll until it drops."""
@@ -299,13 +298,15 @@ class NanoleafRuntime:
             )
             self._set_connected(True)
             if self.power_saving:
-                # Registers for the Remote's events (so that it moves its
-                # state counter while we are away) and wakes the loop below
-                # as soon as a rotation is indicated.
-                await accessory.subscribe_switch_events(chars, self._on_indication)
+                # Registers for the Remote's events, so that it moves its
+                # state counter while we are away. Once subscribed it mirrors
+                # every response as an indication: ignore them (decode=False
+                # keeps the session counters to the reads) and keep polling.
+                await accessory.subscribe_switch_events(
+                    chars, self._ignore_indication, decode=False
+                )
             last_activity = time.monotonic()
             while not self._stopping and client.is_connected:
-                self._poke.clear()
                 for index, char in enumerate(chars):
                     value = await char.read_value()
                     # An armed instance reads 0x00; the others read "null".
@@ -322,14 +323,12 @@ class NanoleafRuntime:
                             f"face_{face}",
                             {"face": face},
                         )
-                if self.power_saving:
-                    if time.monotonic() - last_activity > ACTIVE_WINDOW:
-                        return  # idle: release the Remote
-                    with suppress(TimeoutError):
-                        async with asyncio.timeout(POLL_INTERVAL):
-                            await self._poke.wait()
-                else:
-                    await asyncio.sleep(POLL_INTERVAL)
+                if (
+                    self.power_saving
+                    and time.monotonic() - last_activity > ACTIVE_WINDOW
+                ):
+                    return  # idle: release the Remote
+                await asyncio.sleep(POLL_INTERVAL)
         finally:
             with suppress(Exception):
                 await client.disconnect()

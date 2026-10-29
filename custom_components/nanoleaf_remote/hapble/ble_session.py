@@ -78,7 +78,7 @@ class BleSecureSession:
                 error = error or exc
                 continue
             if offset:
-                logger.info(
+                logger.debug(
                     "Compteur de réception resynchronisé (attendu %d, reçu %d)",
                     self.recv_counter,
                     counter,
