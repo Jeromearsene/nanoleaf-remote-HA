@@ -3,6 +3,12 @@
 All notable changes to this project are documented here. Format loosely
 inspired by [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.2.1] — 2026-10-29
+
+### Patch changes
+
+- Battery saving mode: fix "ChaCha20-Poly1305 tag invalid" right after subscribing to the Remote's events. The Remote can deliver a response twice (as an indication and by read); the encrypted session now resynchronises its counter instead of failing.
+
 ## [0.2.0] — 2026-10-28
 
 ### Minor changes
