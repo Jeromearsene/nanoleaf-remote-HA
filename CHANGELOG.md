@@ -3,6 +3,16 @@
 All notable changes to this project are documented here. Format loosely
 inspired by [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.2.0] — 2026-10-28
+
+### Minor changes
+
+- Experimental battery saving mode (Configure): Home Assistant listens to the Remote's Bluetooth advertisements and connects only when it is turned, instead of polling it every 1.5 s. Off by default. Saving the face table no longer drops other options.
+
+### Patch changes
+
+- New integration icon: a dodecahedron seen face-on, like the real Remote.
+
 ## [0.1.0] — 2026-10-22
 
 Initial public version. Everything below was built and tested — against a

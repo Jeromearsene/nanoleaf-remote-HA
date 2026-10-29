@@ -76,3 +76,50 @@ def test_release_notes_extracts_one_section():
     assert cs.release_notes(result, "0.1.0").strip() == "Initial version."
     with pytest.raises(cs.ChangesetError):
         cs.release_notes(result, "9.9.9")
+
+
+def _git(repo, *args):
+    import subprocess
+
+    subprocess.run(
+        ["git", "-c", "user.name=t", "-c", "user.email=t@example.com", *args],
+        cwd=repo,
+        check=True,
+        capture_output=True,
+    )
+
+
+def _repo_with_base(tmp_path):
+    (tmp_path / "custom_components").mkdir()
+    (tmp_path / "custom_components" / "mod.py").write_text("a = 1\n")
+    (tmp_path / ".changeset").mkdir()
+    (tmp_path / ".changeset" / "README.md").write_text("doc\n")
+    (tmp_path / ".changeset" / "old.md").write_text("---\nbump: patch\n---\n\nOld.\n")
+    _git(tmp_path, "init", "-q", "-b", "main")
+    _git(tmp_path, "add", "-A")
+    _git(tmp_path, "commit", "-q", "-m", "base")
+    _git(tmp_path, "checkout", "-q", "-b", "pr")
+    return tmp_path
+
+
+def test_check_requires_a_changeset_for_user_facing_changes(tmp_path, monkeypatch):
+    repo = _repo_with_base(tmp_path)
+    monkeypatch.setattr(cs, "ROOT", repo)
+    monkeypatch.setattr(cs, "CHANGESET_DIR", repo / ".changeset")
+    (repo / "custom_components" / "mod.py").write_text("a = 2\n")
+    _git(repo, "commit", "-q", "-am", "change")
+    assert cs.main(["check", "--base", "main"]) == 1
+    cs.main(["new", "--bump", "patch", "-m", "Fix it", "--name", "fix-it"])
+    _git(repo, "add", "-A")
+    _git(repo, "commit", "-q", "-m", "changeset")
+    assert cs.main(["check", "--base", "main"]) == 0
+
+
+def test_check_accepts_a_release_pr_that_consumes_changesets(tmp_path, monkeypatch):
+    repo = _repo_with_base(tmp_path)
+    monkeypatch.setattr(cs, "ROOT", repo)
+    monkeypatch.setattr(cs, "CHANGESET_DIR", repo / ".changeset")
+    (repo / "custom_components" / "mod.py").write_text("a = 3\n")  # version bump
+    (repo / ".changeset" / "old.md").unlink()
+    _git(repo, "commit", "-q", "-am", "release")
+    assert cs.main(["check", "--base", "main"]) == 0
