@@ -234,6 +234,12 @@ class NanoleafRuntime:
                     break
                 except Exception as err:  # noqa: BLE001 - keep the listener alive
                     failure = f"{type(err).__name__}: {err}"
+                    _LOGGER.debug(
+                        "Nanoleaf Remote %s: attempt %d failed",
+                        self.address,
+                        attempt,
+                        exc_info=True,
+                    )
                     if attempt == POWER_SAVING_ATTEMPTS:
                         level = (
                             logging.WARNING
@@ -277,7 +283,11 @@ class NanoleafRuntime:
                 keys = await pair_verify.pair_verify(
                     accessory.pair_verify_characteristic(), self._pairing
                 )
-            session = BleSecureSession(read_key=keys.read_key, write_key=keys.write_key)
+            # resync_window=1: the Remote may deliver a response twice (as an
+            # indication and by read) right after we subscribe to its events.
+            session = BleSecureSession(
+                read_key=keys.read_key, write_key=keys.write_key, resync_window=1
+            )
             chars = accessory.programmable_switch_event_characteristics(session=session)
             if not chars:
                 raise RuntimeError("no ProgrammableSwitchEvent characteristic found")
