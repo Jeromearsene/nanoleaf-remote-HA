@@ -25,6 +25,9 @@ ACTIVE_WINDOW = 10.0
 BASELINE_WINDOW = 6.0
 # Never start two sessions closer than this (protects against a loop).
 MIN_SESSION_GAP = 3.0
+# One read of a switch characteristic must answer within this many seconds,
+# otherwise the link is considered lost (a hung read would block the listener).
+READ_TIMEOUT = 8.0
 # Failed attempts after a wake-up before waiting for the next one.
 POWER_SAVING_ATTEMPTS = 3
 
