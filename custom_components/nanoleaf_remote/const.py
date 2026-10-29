@@ -1,7 +1,7 @@
 """Constants for the Nanoleaf Remote integration."""
 
 DOMAIN = "nanoleaf_remote"
-PLATFORMS = ["event"]
+PLATFORMS = ["event", "sensor"]
 
 CONF_ADDRESS = "address"
 CONF_SETUP_CODE = "setup_code"
@@ -35,6 +35,11 @@ POWER_SAVING_ATTEMPTS = 3
 RECONNECT_MIN_DELAY = 3.0
 RECONNECT_MAX_DELAY = 60.0
 
+# The battery level changes slowly (a coin cell): read it once per session,
+# and again only if a permanent (non power-saving) session stays open this
+# long, instead of on every 1.5 s poll.
+BATTERY_POLL_INTERVAL = 1800.0
+
 # How long the setup flow waits for the Remote to be heard: it only
 # advertises while it is awake, so the user turns it during this window.
 WAIT_FOR_REMOTE = 30
@@ -54,3 +59,8 @@ def signal_event(entry_id: str) -> str:
 def signal_state(entry_id: str) -> str:
     """Dispatcher signal fired when one config entry's connection changes."""
     return f"{DOMAIN}_state_{entry_id}"
+
+
+def signal_battery(entry_id: str) -> str:
+    """Dispatcher signal fired when one config entry's battery level is read."""
+    return f"{DOMAIN}_battery_{entry_id}"

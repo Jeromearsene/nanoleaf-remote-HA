@@ -1,6 +1,6 @@
 # Nanoleaf Remote — Home Assistant
 
-Pairs a Nanoleaf Remote directly through Home Assistant's own Bluetooth stack (local adapter or ESPHome Bluetooth proxy) and exposes rotations as an **Event** entity with event types `face_1` … `face_12`. No Apple Home, no MQTT.
+Pairs a Nanoleaf Remote directly through Home Assistant's own Bluetooth stack (local adapter or ESPHome Bluetooth proxy) and exposes rotations as an **Event** entity with event types `face_1` … `face_12`, plus a **Battery** sensor. No Apple Home, no MQTT.
 
 ## Installation
 
@@ -21,6 +21,8 @@ Create an automation with an **Event** trigger on the entity and match `event_ty
 
 - **Calibrate with the Remote**: make sure the Remote is connected (entity available), then for each face turn the Remote onto it, wait a second and press Submit. Start with the face you want to call 1 and follow the same order for the others. Automations are paused meanwhile. The table is saved when the 12 faces are done.
 - **Paste a table**: 12 comma-separated numbers, the Nth being the real face for the Nth detected position (the table printed by `poetry run calibrate`, which also works for the MQTT bridge as `FACE_MAP`).
+
+The device also gets a **Battery** sensor, read from the Remote's HomeKit Battery service once per connection (and every 30 min while a permanent connection is kept). It stays unavailable if the Remote does not expose that service.
 
 ## Status and limitations
 

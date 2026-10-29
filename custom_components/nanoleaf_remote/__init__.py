@@ -21,6 +21,7 @@ from homeassistant.helpers.dispatcher import async_dispatcher_send
 from .const import (
     ACTIVE_WINDOW,
     BASELINE_WINDOW,
+    BATTERY_POLL_INTERVAL,
     CONF_ADDRESS,
     CONF_FACE_MAP,
     CONF_PAIRING,
@@ -33,6 +34,7 @@ from .const import (
     RECONNECT_MAX_DELAY,
     RECONNECT_MIN_DELAY,
     VERIFY_TIMEOUT,
+    signal_battery,
     signal_event,
     signal_state,
 )
@@ -84,6 +86,9 @@ class NanoleafRuntime:
         self._reachable = True
         # Last raw position detected: (0-based index, time.monotonic()).
         self.last_position: tuple[int, float] | None = None
+        # Last Battery Level read (0-100), None until the first successful
+        # read (the Remote may not expose the Battery service at all).
+        self.battery_level: int | None = None
         # Rotation events are not forwarded to automations until then
         # (set while the options dialog runs a calibration).
         self.suppress_events_until = 0.0
@@ -265,6 +270,33 @@ class NanoleafRuntime:
     def _ignore_indication(index: int, decoded, raw: bytes) -> None:
         """Indications are ignored: the Remote mirrors every response as one."""
 
+    async def _read_battery(
+        self, accessory: HapBleAccessory, session: BleSecureSession
+    ) -> None:
+        """Read the Battery Level characteristic, if the Remote exposes it.
+
+        Optional on purpose: a read failure (or an absent Battery service)
+        must never bring down the listener, so it is only logged."""
+        battery_char = accessory.battery_level_characteristic(session=session)
+        if battery_char is None:
+            return
+        try:
+            async with asyncio.timeout(READ_TIMEOUT):
+                raw = await battery_char.read_value()
+        except asyncio.CancelledError:
+            raise
+        except Exception:  # noqa: BLE001 - battery is a bonus, never fatal
+            _LOGGER.debug(
+                "Nanoleaf Remote %s: battery level read failed",
+                self.address,
+                exc_info=True,
+            )
+            return
+        if not raw:
+            return
+        self.battery_level = raw[0]
+        async_dispatcher_send(self.hass, signal_battery(self.entry.entry_id))
+
     async def _session(self) -> None:
         """One connection: verify the pairing, then poll until it drops."""
         device = self.ble_device()
@@ -298,6 +330,7 @@ class NanoleafRuntime:
                 len(chars),
             )
             self._set_connected(True)
+            await self._read_battery(accessory, session)
             if self.power_saving:
                 # Registers for the Remote's events, so that it moves its
                 # state counter while we are away. Once subscribed it mirrors
@@ -307,6 +340,7 @@ class NanoleafRuntime:
                     chars, self._ignore_indication, decode=False
                 )
             last_activity = time.monotonic()
+            last_battery_read = time.monotonic()
             passes = 0
             try:
                 while not self._stopping and client.is_connected:
@@ -328,6 +362,9 @@ class NanoleafRuntime:
                                 {"face": face},
                             )
                     passes += 1
+                    if time.monotonic() - last_battery_read > BATTERY_POLL_INTERVAL:
+                        await self._read_battery(accessory, session)
+                        last_battery_read = time.monotonic()
                     if (
                         self.power_saving
                         and time.monotonic() - last_activity > ACTIVE_WINDOW

@@ -33,5 +33,6 @@ async def async_get_config_entry_diagnostics(
             "last_position": None
             if runtime.last_position is None
             else runtime.last_position[0],
+            "battery_level": runtime.battery_level,
         },
     }
