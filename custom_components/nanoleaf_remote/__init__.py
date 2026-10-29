@@ -29,6 +29,7 @@ from .const import (
     PLATFORMS,
     POLL_INTERVAL,
     POWER_SAVING_ATTEMPTS,
+    READ_TIMEOUT,
     RECONNECT_MAX_DELAY,
     RECONNECT_MIN_DELAY,
     VERIFY_TIMEOUT,
@@ -306,32 +307,56 @@ class NanoleafRuntime:
                     chars, self._ignore_indication, decode=False
                 )
             last_activity = time.monotonic()
-            while not self._stopping and client.is_connected:
-                for index, char in enumerate(chars):
-                    value = await char.read_value()
-                    # An armed instance reads 0x00; the others read "null".
-                    if value and value != b"null":
-                        now = time.monotonic()
-                        last_activity = now
-                        self.last_position = (index, now)
-                        if now < self.suppress_events_until:
-                            continue
-                        face = facemap.face_for_index(self._face_map, index)
-                        async_dispatcher_send(
-                            self.hass,
-                            signal_event(self.entry.entry_id),
-                            f"face_{face}",
-                            {"face": face},
+            passes = 0
+            try:
+                while not self._stopping and client.is_connected:
+                    for index, char in enumerate(chars):
+                        async with asyncio.timeout(READ_TIMEOUT):
+                            value = await char.read_value()
+                        # An armed instance reads 0x00; the others read "null".
+                        if value and value != b"null":
+                            now = time.monotonic()
+                            last_activity = now
+                            self.last_position = (index, now)
+                            if now < self.suppress_events_until:
+                                continue
+                            face = facemap.face_for_index(self._face_map, index)
+                            async_dispatcher_send(
+                                self.hass,
+                                signal_event(self.entry.entry_id),
+                                f"face_{face}",
+                                {"face": face},
+                            )
+                    passes += 1
+                    if (
+                        self.power_saving
+                        and time.monotonic() - last_activity > ACTIVE_WINDOW
+                    ):
+                        _LOGGER.debug(
+                            "Nanoleaf Remote %s idle for %.0f s: releasing it",
+                            self.address,
+                            ACTIVE_WINDOW,
                         )
-                if (
-                    self.power_saving
-                    and time.monotonic() - last_activity > ACTIVE_WINDOW
-                ):
-                    return  # idle: release the Remote
-                await asyncio.sleep(POLL_INTERVAL)
+                        return
+                    await asyncio.sleep(POLL_INTERVAL)
+            except asyncio.CancelledError:
+                raise
+            except Exception as err:  # noqa: BLE001
+                if self.power_saving and passes:
+                    # The Remote let go of us (it sleeps on its own): not a
+                    # failure, the next rotation starts a new session.
+                    _LOGGER.debug(
+                        "Nanoleaf Remote %s dropped the connection (%s: %s)",
+                        self.address,
+                        type(err).__name__,
+                        err,
+                    )
+                    return
+                raise
         finally:
             with suppress(Exception):
                 await client.disconnect()
+            _LOGGER.debug("Nanoleaf Remote %s disconnected", self.address)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: NanoleafConfigEntry) -> bool:
