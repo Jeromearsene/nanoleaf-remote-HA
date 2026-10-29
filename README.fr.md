@@ -17,6 +17,7 @@ Elle dialogue directement avec la télécommande via le Bluetooth de Home Assist
 
 - Configuration depuis l'interface : découverte Bluetooth, appairage avec le code HomeKit à 8 chiffres, ou réutilisation d'un appairage existant.
 - Une entité **Événement** avec les types `face_1` … `face_12`.
+- Un capteur **Batterie**, lu directement sur la télécommande (si elle expose ce service HomeKit).
 - Reconnexion automatique ; l'entité est indisponible quand la télécommande est hors de portée.
 - **Calibration** guidée de la numérotation des faces (vous choisissez quelle face est 1, 2, 3…).
 - Plusieurs télécommandes possibles, interface en français et en anglais.
@@ -40,7 +41,7 @@ Si vous avez lancé les outils de recherche et possédez un `pairing.json`, la t
 
 ## Utilisation
 
-L'intégration crée un appareil avec une entité événement (par exemple `event.nanoleaf_remote_position` ; vérifiez l'identifiant exact dans vos entités). À chaque fois que vous tournez la télécommande sur une face, l'entité enregistre un événement `face_N`.
+L'intégration crée un appareil avec une entité événement (par exemple `event.nanoleaf_remote_position` ; vérifiez l'identifiant exact dans vos entités) et un capteur de batterie (`sensor.nanoleaf_remote_battery`). À chaque fois que vous tournez la télécommande sur une face, l'entité enregistre un événement `face_N`. Le capteur de batterie est lu une fois par connexion (et toutes les 30 minutes en connexion permanente) et reste indisponible si la télécommande n'expose pas de service Batterie.
 
 ```yaml
 automation:

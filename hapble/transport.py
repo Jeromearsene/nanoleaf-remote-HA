@@ -403,6 +403,25 @@ class HapBleAccessory:
                 )
         return result
 
+    def battery_level_characteristic(
+        self, session: Optional[BleSecureSession] = None
+    ) -> Optional[HapBleCharacteristic]:
+        """La caractéristique Battery Level (service Battery), si
+        l'accessoire l'expose. Contrairement à get_characteristic(), ne
+        lève pas d'exception si le service ou la caractéristique est
+        absent·e : retourne None (certains accessoires HomeKit n'exposent
+        pas ce service)."""
+        assert self.client is not None, "Non connecté."
+        service = self.client.services.get_service(uuids.BATTERY_SERVICE_UUID)
+        if service is None:
+            return None
+        gatt_char = service.get_characteristic(uuids.BATTERY_LEVEL_CHARACTERISTIC_UUID)
+        if gatt_char is None:
+            return None
+        return HapBleCharacteristic(
+            self.client, gatt_char, session=session, lock=self.request_lock
+        )
+
     def programmable_switch_event_characteristics(
         self, session: Optional[BleSecureSession] = None
     ) -> List[HapBleCharacteristic]:
