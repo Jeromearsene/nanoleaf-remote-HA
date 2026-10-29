@@ -3,6 +3,12 @@
 All notable changes to this project are documented here. Format loosely
 inspired by [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.2.2] — 2026-10-29
+
+### Patch changes
+
+- Battery saving mode: the Remote mirrors every response as an indication once subscribed; the integration now ignores them (no more busy polling loop, no counter juggling, no log flood).
+
 ## [0.2.1] — 2026-10-29
 
 ### Patch changes
