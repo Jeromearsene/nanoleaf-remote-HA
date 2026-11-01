@@ -391,7 +391,10 @@ class HapBleAccessory:
         accessoire)."""
         assert self.client is not None, "Non connecté."
         result = []
-        for service in self.client.services:
+        # Sorted by GATT handle: BlueZ hands the services over in the order of
+        # a Python `set`, which changes at every process start. Handles are
+        # fixed by the accessory, so the Nth instance is always the same face.
+        for service in sorted(self.client.services, key=lambda s: s.handle):
             if service.uuid.lower() != service_uuid.lower():
                 continue
             gatt_char = service.get_characteristic(char_uuid)
