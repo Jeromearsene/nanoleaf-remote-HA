@@ -3,6 +3,12 @@
 All notable changes to this project are documented here. Format loosely
 inspired by [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.3.0] — 2026-11-01
+
+### Minor changes
+
+- Add a battery level sensor, read from the Remote's HomeKit Battery service once per connection (and every 30 min while permanently connected). It stays unavailable if the Remote does not expose that service.
+
 ## [0.2.3] — 2026-10-29
 
 ### Patch changes
