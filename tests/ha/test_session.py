@@ -33,7 +33,7 @@ class FakeClient:
         self.is_connected = False
 
 
-def make_runtime(power_saving: bool, chars):
+def make_runtime(power_saving: bool, chars, battery_char=None):
     entry = SimpleNamespace(
         entry_id="e1",
         title="Remote",
@@ -67,6 +67,7 @@ def make_runtime(power_saving: bool, chars):
         pair_verify_characteristic=lambda: object(),
         programmable_switch_event_characteristics=lambda session: chars,
         subscribe_switch_events=AsyncMock(return_value=len(chars)),
+        battery_level_characteristic=lambda session: battery_char,
     )
     patches.append(
         patch(
@@ -125,3 +126,42 @@ def test_a_drop_in_permanent_mode_is_still_an_error(monkeypatch) -> None:
     runtime, _events, patches = make_runtime(False, chars)
     with pytest.raises(OSError):
         run_session(runtime, patches)
+
+
+def test_battery_level_is_read_once_connected(monkeypatch) -> None:
+    fast_timings(monkeypatch)
+    chars = [FakeChar([b"null"])]
+    battery_char = FakeChar([bytes([55])])
+    runtime, _events, patches = make_runtime(True, chars, battery_char=battery_char)
+    run_session(runtime, patches)  # returns by itself once idle
+    assert runtime.battery_level == 55
+
+
+def test_missing_battery_service_leaves_battery_level_unset(monkeypatch) -> None:
+    fast_timings(monkeypatch)
+    chars = [FakeChar([b"null"])]
+    runtime, _events, patches = make_runtime(True, chars, battery_char=None)
+    run_session(runtime, patches)
+    assert runtime.battery_level is None
+
+
+def test_a_failed_battery_read_does_not_break_the_session(monkeypatch) -> None:
+    fast_timings(monkeypatch)
+    chars = [FakeChar([b"null"])]
+    battery_char = FakeChar([OSError("link lost")])
+    runtime, _events, patches = make_runtime(True, chars, battery_char=battery_char)
+    run_session(runtime, patches)  # no exception: battery is a bonus, not fatal
+    assert runtime.battery_level is None
+
+
+def test_battery_level_is_refreshed_periodically_in_permanent_mode(monkeypatch) -> None:
+    fast_timings(monkeypatch)
+    monkeypatch.setattr("custom_components.nanoleaf_remote.BATTERY_POLL_INTERVAL", -1.0)
+    chars = [FakeChar([b"null", b"null", OSError("stop")])]
+    battery_char = FakeChar([bytes([10]), bytes([20])])
+    runtime, _events, patches = make_runtime(False, chars, battery_char=battery_char)
+    with pytest.raises(OSError):
+        run_session(runtime, patches)
+    # First read at connect time (10), then refreshed at least once more (20)
+    # because BATTERY_POLL_INTERVAL is negative here: every pass is "due".
+    assert runtime.battery_level == 20

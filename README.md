@@ -17,6 +17,7 @@ It talks to the Remote directly through Home Assistant's own Bluetooth (local ad
 
 - Setup from the UI: Bluetooth discovery, pairing with the 8-digit HomeKit code, or reuse of an existing pairing.
 - One **Event** entity with event types `face_1` … `face_12`.
+- One **Battery** sensor, read from the Remote itself (if it exposes that HomeKit service).
 - Automatic reconnection; the entity is unavailable while the Remote is out of reach.
 - Guided **calibration** of the face numbering (you choose which face is 1, 2, 3…).
 - Several Remotes supported, English and French interface.
@@ -40,7 +41,7 @@ If you ran the research tools and have a `pairing.json`, the Remote is still pai
 
 ## Using it
 
-The integration creates a device with an event entity (for example `event.nanoleaf_remote_position`; check the exact id in your entities). Each time you turn the Remote onto a face, the entity records an event `face_N`.
+The integration creates a device with an event entity (for example `event.nanoleaf_remote_position`; check the exact id in your entities) and a battery sensor (`sensor.nanoleaf_remote_battery`). Each time you turn the Remote onto a face, the entity records an event `face_N`. The battery sensor is read once per connection (and every 30 minutes while the permanent connection is used) and stays unavailable if the Remote does not expose a Battery service.
 
 ```yaml
 automation:

@@ -26,6 +26,13 @@ PAIRING_FEATURES_CHARACTERISTIC_UUID = "0000004f-0000-1000-8000-0026bb765291"
 STATELESS_PROGRAMMABLE_SWITCH_SERVICE_UUID = "00000089-0000-1000-8000-0026bb765291"
 PROGRAMMABLE_SWITCH_EVENT_CHARACTERISTIC_UUID = "00000073-0000-1000-8000-0026bb765291"
 
+# Service Battery et sa caractéristique Battery Level (valeur : un seul
+# octet, pourcentage 0-100). UUIDs standard HAP (spec non-commerciale Apple
+# HAP R2, §8 "Battery service" / "Battery Level characteristic"), pas
+# spécifiques à cet accessoire.
+BATTERY_SERVICE_UUID = "00000096-0000-1000-8000-0026bb765291"
+BATTERY_LEVEL_CHARACTERISTIC_UUID = "00000068-0000-1000-8000-0026bb765291"
+
 # Descripteur GATT qui contient le "Characteristic Instance ID" (CID),
 # nécessaire pour adresser une caractéristique dans une requête HAP-BLE.
 CHARACTERISTIC_ID_DESCRIPTOR_UUID = "dc46f0fe-81d2-4616-b5d9-6abdd796939a"
