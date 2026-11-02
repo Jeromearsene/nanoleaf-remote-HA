@@ -10,28 +10,29 @@ labels: bug
 
 **Home Assistant integration**
 - Home Assistant version and install type (OS, Container...):
-- Bluetooth adapter or ESPHome proxy used:
 - Integration version (HACS):
+- Bluetooth adapter or ESPHome proxy used:
+- Battery saving mode on or off:
+- What you did and what happened instead:
 - Debug logs (`logger: logs: custom_components.nanoleaf_remote: debug`) and the
   downloaded diagnostics file (pairing keys are redacted).
 
-**Full output**
-Paste the complete output (terminal or Home Assistant log) in a code block.
-Please double-check it doesn't contain your 8-digit setup code or the
-contents of `pairing.json` (see `SECURITY.md`) before pasting.
+**Command-line tool**
+- OS and Python version:
+- Git commit or release you're on:
+- Output with `BLEAK_LOGGING=1` set, if relevant.
+
+**Logs and output**
+Paste the complete output in a code block. Please double-check it doesn't
+contain your 8-digit setup code or the contents of `pairing.json` (see
+`SECURITY.md`) before pasting.
 
 ```
 paste here
 ```
 
-**Environment**
-- OS: (Windows / macOS / Linux, + version)
-- Python version: (`python3 --version`)
-- Git commit or release you're on:
-
 **What did you expect to happen?**
 
 **Anything else?**
-If relevant, output with `BLEAK_LOGGING=1` set, or a description of your
-accessory if it's not the exact Nanoleaf Remote this project was built
-against — real-hardware differences are useful signal, not just bugs.
+If your accessory is not the exact Nanoleaf Remote this project was built
+against, describe it: real-hardware differences are useful signal, not just bugs.

@@ -2,7 +2,11 @@
 
 [![CI](https://github.com/Jeromearsene/nanoleaf-remote-HA/actions/workflows/ci.yml/badge.svg)](https://github.com/Jeromearsene/nanoleaf-remote-HA/actions/workflows/ci.yml)
 [![Validate](https://github.com/Jeromearsene/nanoleaf-remote-HA/actions/workflows/validate.yml/badge.svg)](https://github.com/Jeromearsene/nanoleaf-remote-HA/actions/workflows/validate.yml)
+[![Release](https://img.shields.io/github/v/release/Jeromearsene/nanoleaf-remote-HA)](https://github.com/Jeromearsene/nanoleaf-remote-HA/releases)
 [![HACS](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz)
+[![Home Assistant](https://img.shields.io/badge/Home%20Assistant-2025.1%2B-41BDF5.svg)](https://www.home-assistant.io)
+[![Last commit](https://img.shields.io/github/last-commit/Jeromearsene/nanoleaf-remote-HA)](https://github.com/Jeromearsene/nanoleaf-remote-HA/commits/main)
+[![Issues](https://img.shields.io/github/issues/Jeromearsene/nanoleaf-remote-HA)](https://github.com/Jeromearsene/nanoleaf-remote-HA/issues)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 🇬🇧 [English](README.md) | 🇫🇷 Français (ce document)
@@ -76,13 +80,24 @@ Par défaut, Home Assistant reste connecté à la télécommande et la lit toute
 | « Refuse un nouvel appairage » | Elle est encore appairée ailleurs (Apple Maison, ou les outils `hapble`). Supprimez-la de là, ou utilisez **Réutiliser un appairage existant**. |
 | « Appairage refusé » à l'import | La télécommande ne connaît plus cet appairage (par exemple après un reset). Appairez-la avec son code. |
 | Elle clignote ou ne s'allume jamais | Deux piles AA neuves, placées en sens opposés comme indiqué. Elle doit s'allumer quand le couvercle se referme et changer de couleur quand on la tourne. En dernier recours : appuyez avec une épingle sur le bouton reset du logement des piles, puis ré-appairez. |
-| Mauvais numéro de face | Lancez la calibration (ci-dessus). |
+| Mauvais numéro de face | Lancez la calibration (ci-dessus). Depuis la 0.3.1 la numérotation reste la même après un redémarrage ; si vous aviez calibré avec une version antérieure, recalibrez une fois. |
 
 Activez les journaux de débogage avec `logger: logs: custom_components.nanoleaf_remote: debug` et joignez-les (sans secrets) à un ticket. Le téléchargement des diagnostics masque les clés d'appairage.
 
 ## Fonctionnement
 
 La télécommande est un accessoire HomeKit Bluetooth avec 12 instances d'*interrupteur programmable*. L'intégration l'appaire une fois (HomeKit Pair-Setup), puis se connecte via le Bluetooth de Home Assistant, vérifie l'appairage (Pair-Verify) et lit les caractéristiques toutes les 1,5 s, ce qui maintient aussi la connexion (la télécommande coupe les connexions inactives après ~5 s). Le code du protocole est dans [`hapble/`](hapble/) et embarqué dans `custom_components/nanoleaf_remote/hapble/` (HACS n'installe que ce dossier). Le récit de la rétro-ingénierie est dans [`docs/hapble.fr.md`](docs/hapble.fr.md).
+
+## Limites connues
+
+- La télécommande n'accepte **qu'un contrôleur à la fois** : elle ne peut pas rester dans Apple Maison et dans Home Assistant en même temps.
+- Elle n'émet que lorsqu'elle est éveillée : il faut la tourner pour l'appairer ou la reconnecter.
+- Testée sur une seule vraie télécommande pour l'instant : dites-nous ce que vous observez sur la vôtre.
+- L'implémentation du protocole est maison et n'a pas été auditée de façon indépendante.
+
+## Supprimer l'intégration
+
+Supprimez l'entrée dans **Paramètres → Appareils et services → Nanoleaf Remote**, puis (facultatif) retirez le dépôt de HACS. La télécommande reste appairée avec les clés de Home Assistant tant que vous ne la réinitialisez pas (bouton reset dans le logement des piles, voir Dépannage) ; elle pourra ensuite être appairée à Apple Maison ou à un autre contrôleur.
 
 ## Sécurité
 
