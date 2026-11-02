@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/Jeromearsene/nanoleaf-remote-HA/actions/workflows/ci.yml/badge.svg)](https://github.com/Jeromearsene/nanoleaf-remote-HA/actions/workflows/ci.yml)
 [![Validate](https://github.com/Jeromearsene/nanoleaf-remote-HA/actions/workflows/validate.yml/badge.svg)](https://github.com/Jeromearsene/nanoleaf-remote-HA/actions/workflows/validate.yml)
+[![Release](https://img.shields.io/github/v/release/Jeromearsene/nanoleaf-remote-HA)](https://github.com/Jeromearsene/nanoleaf-remote-HA/releases)
 [![HACS](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -76,13 +77,24 @@ By default Home Assistant stays connected to the Remote and reads it every 1.5 s
 | "Refuses new pairings" | It is still paired elsewhere (Apple Home, or the `hapble` tools). Remove it there, or use **Reuse an existing pairing**. |
 | "Pairing rejected" on import | The Remote no longer knows that pairing (for example after a reset). Pair with the setup code instead. |
 | Remote blinks or never lights up | Two fresh AA batteries, one inserted each way as marked. It must light up when the cover closes and change colour when turned. Last resort: press the reset button on the battery housing with a pin, then pair again. |
-| Wrong face number | Run the calibration (above). |
+| Wrong face number | Run the calibration (above). Since 0.3.1 the numbering stays the same after a restart; if you calibrated with an earlier version, calibrate once more. |
 
 Enable debug logs with `logger: logs: custom_components.nanoleaf_remote: debug` and attach them (without secrets) to an issue. The diagnostics download redacts the pairing keys.
 
 ## How it works
 
 The Remote is a HomeKit Bluetooth accessory with 12 *programmable switch* instances. The integration pairs once (HomeKit Pair-Setup), then connects through Home Assistant's Bluetooth, verifies the pairing (Pair-Verify) and reads the switch characteristics every 1.5 s, which also keeps the connection alive (the Remote drops idle connections after ~5 s). The protocol code lives in [`hapble/`](hapble/) and is vendored into `custom_components/nanoleaf_remote/hapble/` (HACS only installs that folder). The reverse-engineering story is in [`docs/hapble.md`](docs/hapble.md).
+
+## Known limitations
+
+- The Remote accepts **one controller at a time**: it cannot stay in Apple Home and Home Assistant together.
+- It only advertises while awake, so it must be paired and (re)connected while you turn it.
+- Tested on one real Remote so far: please report what you see on yours.
+- The protocol implementation is home-made and has had no independent security audit.
+
+## Removing the integration
+
+Delete the entry in **Settings → Devices & services → Nanoleaf Remote**, then (optional) remove the repository from HACS. The Remote stays paired with Home Assistant's keys until you reset it (reset button in the battery housing, see Troubleshooting), after which it can be paired with Apple Home or another controller again.
 
 ## Security
 
