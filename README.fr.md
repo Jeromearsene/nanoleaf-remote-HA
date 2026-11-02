@@ -17,6 +17,16 @@ Elle dialogue directement avec la télécommande via le Bluetooth de Home Assist
 
 > **Avertissement** : projet indépendant, sans lien avec Apple ni Nanoleaf, fourni tel quel. Il repose sur une implémentation maison du protocole HomeKit sur Bluetooth LE qui n'a fait l'objet **d'aucun audit de sécurité indépendant**. Voir [`SECURITY.md`](SECURITY.md).
 
+## Captures d'écran
+
+La page de l'appareil : l'entité événement **Position** (dernière face tournée), le capteur **Batterie** et les automatisations qui utilisent la télécommande.
+
+![Page de l'appareil Nanoleaf Remote dans Home Assistant](https://raw.githubusercontent.com/Jeromearsene/nanoleaf-remote-HA/main/docs/images/device.png)
+
+La fenêtre **Configurer** : calibration des faces, collage d'une table et mode économie de piles (expérimental).
+
+![Fenêtre Configurer de l'intégration](https://raw.githubusercontent.com/Jeromearsene/nanoleaf-remote-HA/main/docs/images/options.png)
+
 ## Fonctionnalités
 
 - Configuration depuis l'interface : découverte Bluetooth, appairage avec le code HomeKit à 8 chiffres, ou réutilisation d'un appairage existant.

@@ -17,6 +17,16 @@ It talks to the Remote directly through Home Assistant's own Bluetooth (local ad
 
 > **Disclaimer**: independent project, not affiliated with Apple or Nanoleaf, provided as is. It uses a home-made implementation of the HomeKit Accessory Protocol over Bluetooth LE that has had **no independent security audit**. See [`SECURITY.md`](SECURITY.md).
 
+## Screenshots
+
+The device page: the **Position** event entity (last face turned), the **Battery** sensor and the automations that use the Remote (French interface shown).
+
+![Nanoleaf Remote device page in Home Assistant](https://raw.githubusercontent.com/Jeromearsene/nanoleaf-remote-HA/main/docs/images/device.png)
+
+The **Configure** dialog: face calibration, pasting a face table, and the experimental battery saving mode.
+
+![Configure dialog of the integration](https://raw.githubusercontent.com/Jeromearsene/nanoleaf-remote-HA/main/docs/images/options.png)
+
 ## Features
 
 - Setup from the UI: Bluetooth discovery, pairing with the 8-digit HomeKit code, or reuse of an existing pairing.
