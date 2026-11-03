@@ -24,7 +24,7 @@ Every existing Python HAP-BLE implementation (`homekit_python`,
 itself depends on **BlueZ via D-Bus**, available on Linux only. `bleak`,
 by contrast, is cross-platform (Windows/Linux/macOS). This repository
 reuses `pyhomekit`'s protocol logic (its source was read closely while
-building this) but with `bleak` as the transport instead of `bluepy` —
+building this; it is MIT-licensed, see [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md)) but with `bleak` as the transport instead of `bluepy` —
 as far as we know, the first HAP-BLE client built this way.
 
 ## Project status

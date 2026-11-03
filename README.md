@@ -127,4 +127,4 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md). Release history: [`CHANGELOG.md`](CHAN
 
 ## License
 
-[MIT](LICENSE).
+[MIT](LICENSE). Parts of the protocol layer derive from [pyhomekit](https://github.com/henridwyer/pyhomekit) (MIT): see [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).

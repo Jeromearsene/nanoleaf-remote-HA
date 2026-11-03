@@ -13,6 +13,9 @@ Le motif d'échange HAP-BLE pour une requête/réponse est :
 Ce comportement est repris tel quel de pyhomekit (ble.py), qui l'utilise
 avec bluepy ; ici le transport est bleak mais la logique protocolaire est
 identique.
+
+Portions derived from pyhomekit (MIT License, Copyright 2017 Henri Dwyer,
+https://github.com/henridwyer/pyhomekit): see THIRD_PARTY_NOTICES.md.
 """
 
 import asyncio

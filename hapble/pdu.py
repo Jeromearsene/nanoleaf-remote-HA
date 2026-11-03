@@ -7,6 +7,9 @@ HapBlePduRequestHeader / HapBlePduResponseHeader / fragment_tlvs), qui
 implémente ce même framing (avec bluepy comme transport, ici on porte la
 logique vers bleak).
 
+Portions derived from pyhomekit (MIT License, Copyright 2017 Henri Dwyer,
+https://github.com/henridwyer/pyhomekit): see THIRD_PARTY_NOTICES.md.
+
 Control Field (1 octet), MSB -> LSB :
     bit7 : continuation ("ceci est un fragment de suite")
     bits6-2 : réservé, toujours 0
