@@ -320,7 +320,9 @@ class NanoleafRuntime:
             session = BleSecureSession(
                 read_key=keys.read_key, write_key=keys.write_key, resync_window=1
             )
-            chars = accessory.programmable_switch_event_characteristics(session=session)
+            chars = await accessory.programmable_switch_event_characteristics(
+                session=session
+            )
             if not chars:
                 raise RuntimeError("no ProgrammableSwitchEvent characteristic found")
 

@@ -73,7 +73,7 @@ async def main() -> int:
                 write_key=session_keys.write_key,
             )
 
-            switch_chars = accessory.programmable_switch_event_characteristics(
+            switch_chars = await accessory.programmable_switch_event_characteristics(
                 session=session
             )
             print(

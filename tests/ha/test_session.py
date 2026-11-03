@@ -65,7 +65,7 @@ def make_runtime(power_saving: bool, chars, battery_char=None):
     ]
     accessory = SimpleNamespace(
         pair_verify_characteristic=lambda: object(),
-        programmable_switch_event_characteristics=lambda session: chars,
+        programmable_switch_event_characteristics=AsyncMock(return_value=chars),
         subscribe_switch_events=AsyncMock(return_value=len(chars)),
         battery_level_characteristic=lambda session: battery_char,
     )

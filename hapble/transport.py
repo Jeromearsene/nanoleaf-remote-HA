@@ -422,18 +422,44 @@ class HapBleAccessory:
             self.client, gatt_char, session=session, lock=self.request_lock
         )
 
-    def programmable_switch_event_characteristics(
+    async def programmable_switch_event_characteristics(
         self, session: Optional[BleSecureSession] = None
     ) -> List[HapBleCharacteristic]:
         """Les caractéristiques ProgrammableSwitchEvent (une par instance du
         service Stateless Programmable Switch — 8 trouvées en Phase 1 sur
         cet accessoire). Nécessitent une session chiffrée (Pair-Verify)
-        pour être lues."""
-        return self.get_all_characteristics(
+        pour être lues.
+
+        Triées par leur propre Characteristic Instance ID (CID) — PAS par
+        l'ordre de découverte GATT brut (celui que renvoyait
+        `get_all_characteristics` seule, c'est-à-dire l'ordre dans lequel
+        `bleak` énumère les services). Rien dans la spec HAP-BLE ni dans
+        `bleak` ne garantit que cet ordre de découverte est stable d'une
+        connexion à l'autre ; un retour utilisateur signalant la
+        calibration des faces "cassée" après chaque mise à jour/redémarrage
+        (une face calibrée comme 1 détectée comme une autre face après coup)
+        est cohérent avec un changement de cet ordre entre deux sessions,
+        sans que ça ait pu être confirmé directement sur du matériel ici.
+        Le CID, lui, est assigné une fois pour toutes par le firmware de
+        l'accessoire et sert déjà à adresser chaque caractéristique dans le
+        protocole HAP-BLE lui-même : il ne peut pas changer d'une session à
+        l'autre. Comme la calibration des faces (`hapble.facemap`) associe
+        un numéro de face à une *position dans cette liste*, trier par CID
+        rend cette position indépendante de l'ordre de découverte BLE et
+        donc stable d'une session à l'autre, quelle que soit la cause exacte
+        du symptôme observé."""
+        characteristics = self.get_all_characteristics(
             uuids.STATELESS_PROGRAMMABLE_SWITCH_SERVICE_UUID,
             uuids.PROGRAMMABLE_SWITCH_EVENT_CHARACTERISTIC_UUID,
             session=session,
         )
+        cids = await asyncio.gather(*(char.cid() for char in characteristics))
+        return [
+            char
+            for _cid, char in sorted(
+                zip(cids, characteristics, strict=True), key=lambda pair: pair[0]
+            )
+        ]
 
     async def subscribe_switch_events(
         self,
