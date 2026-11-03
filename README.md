@@ -121,6 +121,10 @@ If Home Assistant cannot reach the Remote by Bluetooth, a standalone bridge can 
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md). Release history: [`CHANGELOG.md`](CHANGELOG.md).
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Jeromearsene/nanoleaf-remote-HA&type=Date)](https://star-history.com/#Jeromearsene/nanoleaf-remote-HA&Date)
+
 ## License
 
 [MIT](LICENSE).

@@ -121,6 +121,10 @@ Si Home Assistant ne peut pas joindre la télécommande en Bluetooth, un pont au
 
 Voir [`CONTRIBUTING.md`](CONTRIBUTING.md). Historique des versions : [`CHANGELOG.md`](CHANGELOG.md).
 
+## Historique des stars
+
+[![Star History Chart](https://api.star-history.com/svg?repos=Jeromearsene/nanoleaf-remote-HA&type=Date)](https://star-history.com/#Jeromearsene/nanoleaf-remote-HA&Date)
+
 ## Licence
 
 [MIT](LICENSE).
