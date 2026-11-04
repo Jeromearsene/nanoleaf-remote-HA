@@ -3,6 +3,12 @@
 All notable changes to this project are documented here. Format loosely
 inspired by [Keep a Changelog](https://keepachangelog.com/).
 
+## [0.3.2] — 2026-11-05
+
+### Patch changes
+
+- Add the third-party notice required by pyhomekit's MIT license (THIRD_PARTY_NOTICES.md, shipped with the vendored hapble code) and reference it from the derived modules. No behaviour change.
+
 ## [0.3.1] — 2026-11-02
 
 ### Patch changes
