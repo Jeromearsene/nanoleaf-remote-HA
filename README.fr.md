@@ -127,4 +127,4 @@ Voir [`CONTRIBUTING.md`](CONTRIBUTING.md). Historique des versions : [`CHANGELOG
 
 ## Licence
 
-[MIT](LICENSE).
+[MIT](LICENSE). Une partie de la couche protocolaire dérive de [pyhomekit](https://github.com/henridwyer/pyhomekit) (MIT) : voir [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).

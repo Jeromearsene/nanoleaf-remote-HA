@@ -13,6 +13,9 @@ même tag sont concaténées pour reconstituer la valeur logique.
 Vérifié par recoupement avec pyhomekit (iterate_tvl + la logique de
 concaténation dans HapCharacteristic._parse_response, qui fait
 `val = attributes[key] + val` en cas de tag dupliqué).
+
+Portions derived from pyhomekit (MIT License, Copyright 2017 Henri Dwyer,
+https://github.com/henridwyer/pyhomekit): see THIRD_PARTY_NOTICES.md.
 """
 
 from typing import Dict, Iterable, List, Tuple

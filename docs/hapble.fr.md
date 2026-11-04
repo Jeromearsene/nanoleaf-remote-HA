@@ -22,7 +22,8 @@ Toutes les implémentations Python existantes de HAP-BLE (`homekit_python`,
 BLE) reposent sur `bluepy`, qui lui-même dépend de **BlueZ via D-Bus** —
 disponible uniquement sous Linux. `bleak`, en revanche, est multiplateforme
 (Windows/Linux/macOS). Ce dépôt reprend la logique protocolaire de
-`pyhomekit` (dont le code source a été consulté pour ce projet) mais avec
+`pyhomekit` (dont le code source a été consulté pour ce projet ; licence MIT,
+voir [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md)) mais avec
 `bleak` comme transport à la place de `bluepy`.
 
 ## État d'avancement

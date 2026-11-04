@@ -11,6 +11,9 @@ Sources vérifiées :
 - Salts/Infos HKDF pour Pair-Setup et Pair-Verify : plusieurs implémentations
   concordantes (aanon4/HomeKit, spec non-commerciale Apple HAP R2, forums
   développeurs Apple)
+
+Portions derived from pyhomekit (MIT License, Copyright 2017 Henri Dwyer,
+https://github.com/henridwyer/pyhomekit): see THIRD_PARTY_NOTICES.md.
 """
 
 # --- Service et caractéristiques du service "Pairing" -----------------

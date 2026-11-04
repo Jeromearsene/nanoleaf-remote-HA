@@ -54,6 +54,16 @@ def main() -> int:
                 TARGET.mkdir(parents=True, exist_ok=True)
                 target.write_bytes(expected)
 
+    # The third-party notice travels with the vendored code (HACS only
+    # installs custom_components/<domain>/).
+    notice = ROOT / "THIRD_PARTY_NOTICES.md"
+    notice_target = TARGET / notice.name
+    if not notice_target.exists() or notice_target.read_bytes() != notice.read_bytes():
+        drift.append(notice_target.relative_to(ROOT).as_posix())
+        if not args.check:
+            TARGET.mkdir(parents=True, exist_ok=True)
+            notice_target.write_bytes(notice.read_bytes())
+
     extra = sorted(
         p.name for p in TARGET.glob("*.py") if p.stem not in VENDORED_MODULES
     )
